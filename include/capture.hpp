@@ -43,6 +43,11 @@ const Resolution SUPPORTED_RESOLUTIONS[] = {
 };
 
 /**
+	\var timeFrame  map contenant les variable : key(resX, resY) value(fps)
+	*/
+std::map <Resolution,double> timeFrame = {};
+
+/**
 	\fn getVideoFileName
 	\brief Lister les périphériques USB.
 	*/
@@ -54,10 +59,13 @@ std::string getLsUSB();
 	*/
 std::string getVideoFileName(std::string cameraID);
 
+
 /**
-	\var timeFrame  map contenant les variable : key(resX, resY) value(fps)
+	\fn bonecVtiming
+	\param fileName fichier de périphérique vidéo
+	\brief Calcule le frame par seconde de chaque résolution
 	*/
-std::map <Resolution,double> timeFrame = {}; 
+void bonecVtiming(std::string fileName)
 
 /**
 	\fn captureVideo(std::string cameraID,

@@ -5,8 +5,13 @@
 
 #include <capture.hpp>
 
+#define NOMBRE_DE_FRAME 10
+#define OFFSET_READ 2
+
 using namespace std;
 using namespace cv;
+
+
 
 std::string getLsUSB(){
 	FILE *fpipe;
@@ -36,10 +41,10 @@ std::string getVideoFileName(std::string cameraID){
 	return std::string("/dev/bus/usb/" + busID + "/" + deviceID);
 }
 
-void bonecVtiming()
+void bonecVtiming(std::string fileName)
 {
     
-    VideoCapture capture(0);
+    VideoCapture capture(fileName);
     int n = 0;
 
     for (auto i : SUPPORTED_RESOLUTIONS){
@@ -51,16 +56,18 @@ void bonecVtiming()
         if(!capture.isOpened()){
              throw std::invalid_argument("Failed to  connect to the camera");
         }
+
         Mat frame, edges;
 
         // lecture de 2 frames
-        capture >> frame;
-        capture >> frame;
+        for (int i = 0; i++; OFFSET_READ){
+            capture >> frame;
+        }
 
         struct timespec start, end;
         clock_gettime( CLOCK_REALTIME, &start );
 
-        int frames=10;
+        int frames = NOMBRE_DE_FRAME;
         for(int i=0; i<frames; i++){
             capture >> frame;
             if(frame.empty()){
