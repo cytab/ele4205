@@ -5,14 +5,15 @@
 #include <iostream>
 #include <string>
 #include <time.h>
+#include <map>
 #include <opencv2/opencv.hpp>
 
 /**
 	\typedef Resolution Structure d'enregistrement d'une résolution.
 	*/
 typedef struct Resolution {
-	unsigned int w;
-	unsigned int h;
+	int w;
+	int h;
 };
 
 /**
@@ -35,9 +36,9 @@ const Resolution supportedResolutions[] = {
 };
 
 /**
-	\var timeFrame  Vecteur contenant le temps de passage d'un frame à une autre pour chaque résoluton displnible
+	\var timeFrame  map contenant les variable : key(resX, resY) value(fps)
 	*/
-std::vector<float> timeFrame = {}; 
+std::map <Resolution,double> timeFrame = {}; 
 /**
 	\fn captureVideo(std::string cameraID,
 		float duration,
