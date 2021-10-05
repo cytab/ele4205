@@ -72,12 +72,12 @@ void bonecVtiming(std::string fileName)
 		float duration,
 		std::string outputFileName)
 	\brief Capture une séquence vidéo
-	\param cameraID Identifiant de la caméra
+	\param fileName Fichier de la caméra
 	\param duration Durée de la capture (en secondes)
 	\param res Résolution à utiliser
 	\param outputFileName Nom du fichier de sortie
 	**/
-void captureVideo(std::string cameraID,
+void captureVideo(std::string fileName,
 	float duration,
 	Resolution res,
 	std::string outputFileName);

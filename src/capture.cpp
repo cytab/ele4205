@@ -11,8 +11,6 @@
 using namespace std;
 using namespace cv;
 
-
-
 std::string getLsUSB(){
 	FILE *fpipe;
 	char *command = "lsusb";
@@ -33,7 +31,7 @@ std::string getVideoFileName(std::string cameraID){
 	std::string devices = getLsUSB();
 	std::string line;
 	while (std::getline(devices, line)) {
-		if (line.fins(CAMERA_ID) != std::string::npos)
+		if (line.fins(cameraID) != std::string::npos)
 			break;
 	}
 	std::string busID = line.substr(4, 7);
@@ -78,7 +76,12 @@ void bonecVtiming(std::string fileName)
         clock_gettime( CLOCK_REALTIME, &end );
         double difference = (end.tv_sec - start.tv_sec) + (double)(end.tv_nsec - start.tv_nsec)/1000000000.0;
         timeFrame[i] = frames/difference ; 
-
     }
+}
 
+void captureVideo(std::string fileName,
+		float duration,
+		Resolution res,
+		std::string outputFileName){
+	
 }
