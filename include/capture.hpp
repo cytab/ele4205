@@ -9,6 +9,11 @@
 #include <opencv2/opencv.hpp>
 
 /**
+	\var CAMERA_ID Identifiant de la caméra.
+	*/
+const std::string CAMERA_ID = "046d:0825"
+
+/**
 	\typedef Resolution Structure d'enregistrement d'une résolution.
 	*/
 typedef struct Resolution {
@@ -19,7 +24,7 @@ typedef struct Resolution {
 /**
 	\var supportedResolutions Liste des résolutions supportées.
 	*/
-const Resolution supportedResolutions[] = {
+const Resolution SUPPORTED_RESOLUTIONS[] = {
 	{176, 144},
 	{160, 120},
 	{320, 176},
@@ -36,9 +41,16 @@ const Resolution supportedResolutions[] = {
 };
 
 /**
+	\fn getVideoFileName
+	\brief Obtenir le chemin d'accès de la caméra à partir de son ID.
+	*/
+std::string getVideoFileName(std::string cameraID);
+
+/**
 	\var timeFrame  map contenant les variable : key(resX, resY) value(fps)
 	*/
 std::map <Resolution,double> timeFrame = {}; 
+
 /**
 	\fn captureVideo(std::string cameraID,
 		float duration,
@@ -53,3 +65,4 @@ void captureVideo(std::string cameraID,
 	float duration,
 	Resolution res,
 	std::string outputFileName);
+

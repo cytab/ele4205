@@ -11,15 +11,13 @@
 using namespace std;
 using namespace cv;
 
-
-
 void bonecVtiming()
 {
     
     VideoCapture capture(0);
     int n = 0;
 
-    for (auto i : supportedResolutions){
+    for (auto i : SUPPORTED_RESOLUTIONS){
 
         // attribution des résolutons 
         capture.set(CV_CAP_PROP_FRAME_WIDTH, i.w);
