@@ -11,9 +11,9 @@
 	\typedef Resolution Structure d'enregistrement d'une résolution.
 	*/
 typedef struct Resolution {
-	unsigned int w,
-	unsigned int h
-}
+	unsigned int w;
+	unsigned int h;
+};
 
 /**
 	\var supportedResolutions Liste des résolutions supportées.
