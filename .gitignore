@@ -7,3 +7,7 @@
 
 # Fichiers de déverminage
 *.log
+
+# Fichiers de documentation
+doc/html
+doc/latex
