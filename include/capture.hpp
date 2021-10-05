@@ -5,8 +5,10 @@
 #include <iostream>
 #include <string>
 #include <time.h>
+#include <stdlib.h>
 #include <map>
 #include <opencv2/opencv.hpp>
+#include <regex>
 
 /**
 	\var CAMERA_ID Identifiant de la caméra.
@@ -39,6 +41,12 @@ const Resolution SUPPORTED_RESOLUTIONS[] = {
 	{1280, 720},
 	{1280, 960}
 };
+
+/**
+	\fn getVideoFileName
+	\brief Lister les périphériques USB.
+	*/
+std::string getLsUSB();
 
 /**
 	\fn getVideoFileName
