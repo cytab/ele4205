@@ -1,0 +1,9 @@
+# Fichiers de métadonnées
+.*
+
+# Fichiers de compilation
+*.o
+*.pyc
+
+# Fichiers de déverminage
+*.log
