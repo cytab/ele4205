@@ -35,6 +35,10 @@ const Resolution supportedResolutions[] = {
 };
 
 /**
+	\var timeFrame  Vecteur contenant le temps de passage d'un frame à une autre pour chaque résoluton displnible
+	*/
+std::vector<float> timeFrame = {}; 
+/**
 	\fn captureVideo(std::string cameraID,
 		float duration,
 		std::string outputFileName)
