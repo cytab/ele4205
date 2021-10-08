@@ -7,8 +7,8 @@
 #include <time.h>
 #include <stdlib.h>
 #include <map>
+#include <exception>
 #include <opencv2/opencv.hpp>
-#include <regex>
 
 /**
 	\var CAMERA_ID Identifiant de la caméra.
@@ -65,7 +65,7 @@ std::string getVideoFileName(std::string cameraID);
 	\param fileName fichier de périphérique vidéo
 	\brief Calcule le frame par seconde de chaque résolution
 	*/
-void bonecVtiming(std::string fileName)
+void boneCVtiming(std::string fileName)
 
 /**
 	\fn captureVideo(std::string cameraID,
@@ -81,4 +81,3 @@ void captureVideo(std::string fileName,
 	float duration,
 	Resolution res,
 	std::string outputFileName);
-

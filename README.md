@@ -15,7 +15,6 @@ suivantes composent le répertoire :
 - `conf` : Fichiers de configuration de la compilation.
 - `doc` : Documentation du projet. Uniquement les fichiers sources sont
   versionnés.
-  `https://www.doxygen.nl/index.html`
 - `include` : Fichiers d'inclusion.
 - `src` : Fichiers sources.
 
