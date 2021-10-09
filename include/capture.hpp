@@ -6,7 +6,7 @@
 #include <string>
 #include <time.h>
 #include <stdlib.h>
-#include <map>
+#include <vector>
 #include <exception>
 #include <opencv2/opencv.hpp>
 
@@ -42,10 +42,23 @@ const Resolution SUPPORTED_RESOLUTIONS[] = {
 	{1280, 960}
 };
 
+typedef struct FrameSetting {
+	Resolution res;
+	double fps;
+};
+
 /**
-	\var timeFrame  map contenant les variable : key(resX, resY) value(fps)
+	\var frameSettings Vecteur contenant les variable : resX, resY, fps
 	*/
-std::map <Resolution,double> timeFrame = {};
+std::vector <FrameSetting> frameSettings = {};
+
+/**
+	\fn getFrameFPS Obtenir la durée d'une image (en : frame) pour une
+		résolution donnée.
+	\return Durée de la prise d'image en secondes ou -1 si la résolution n'est
+		pas supportée.
+	*/
+double getFrameFPS(Resolution res);
 
 /**
 	\fn getVideoFileName

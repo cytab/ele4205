@@ -41,10 +41,10 @@ void boneCVtiming(std::string fileName)
 	cv::VideoCapture capture(fileName);
 	int n = 0;
 
-	for (auto i : SUPPORTED_RESOLUTIONS){
+	for (auto res : SUPPORTED_RESOLUTIONS){
 		// attribution des résolutions 
-		capture.set(cv::CV_CAP_PROP_FRAME_WIDTH, i.w);
-		capture.set(cv::CV_CAP_PROP_FRAME_HEIGHT, i.h);
+		capture.set(cv::CV_CAP_PROP_FRAME_WIDTH, res.w);
+		capture.set(cv::CV_CAP_PROP_FRAME_HEIGHT, res.h);
 
 		if(!capture.isOpened()){
 			throw std::system_error("Failed to  connect to the camera");
@@ -70,8 +70,16 @@ void boneCVtiming(std::string fileName)
 
 		clock_gettime(CLOCK_REALTIME, &end);
 		double difference = (end.tv_sec - start.tv_sec) + (double)(end.tv_nsec - start.tv_nsec)/1000000000.0;
-		timeFrame[i] = frames/difference ; 
+		frameSettings.push_back(FrameSetting{res, frames/difference});
 	}
+}
+
+double getFrameFPS(Resolution res){
+	for (auto setting : frameSettings) {
+		if (setting.res.x == res.x && setting.res.y == res.y)
+			return setting.duration;
+	}
+	return -1;
 }
 
 void captureVideo(std::string fileName,
@@ -84,7 +92,7 @@ void captureVideo(std::string fileName,
 	if(!capture.isOpened()){
 		throw std::system_error("Failed to  connect to the camera");
 	}
-	double fps = timeFrame[res];
+	double fps = getFrameFPS(res);
 	int nFrames = (int) (duration * fps);
 
 	cv::VideoWriter writer(outputFileName,
