@@ -51,11 +51,13 @@ void boneCVtiming(std::string fileName)
 {
 	cv::VideoCapture capture(0);
 	int n = 0;
-
+	std::cout << "*" << std::endl;
 	for (auto res : SUPPORTED_RESOLUTIONS){
-		// attribution des résolutions 
+		// attribution des résolutions
+		 
 		capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w);
 		capture.set(CV_CAP_PROP_FRAME_HEIGHT, res.h);
+		capture.open(0);
 
 		if(!capture.isOpened()){
 			throw std::system_error(EDOM,
@@ -86,6 +88,7 @@ void boneCVtiming(std::string fileName)
 		clock_gettime(CLOCK_REALTIME, &end);
 		double difference = (end.tv_sec - start.tv_sec) + (double)(end.tv_nsec - start.tv_nsec)/1000000000.0;
 		frameSettings.push_back(FrameSetting{res, frames/difference});
+		//std::cout << "FPS for " << res.w << "    " << res.h << " : " << frameSettings[frameSettings.size()-1] << std::endl;
 	}
 	std::cout << "Finished bone" << std::endl;
 }
@@ -102,7 +105,7 @@ void captureVideo(std::string fileName,
 		float duration,
 		Resolution res,
 		std::string outputFileName){
-	cv::VideoCapture capture(fileName);
+	cv::VideoCapture capture(0);
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w);
 	capture.set(CV_CAP_PROP_FRAME_HEIGHT, res.h);
 	if(!capture.isOpened()){

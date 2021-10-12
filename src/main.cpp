@@ -12,7 +12,7 @@
 	*/
 int main (int argc, char ** argv) {
 	if (argc < 2){
-		std::cout << "Veuillez fournir la résolution." << std::endl;
+		std::cout << "Veuillez fournir la résolution (w, h)." << std::endl;
 		return -1;
 	}
 	int resX = std::stoi(std::string(argv[1]));

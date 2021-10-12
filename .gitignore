@@ -11,3 +11,6 @@
 # Fichiers de documentation
 doc/html
 doc/latex
+
+# Fichiers de compilation
+build
