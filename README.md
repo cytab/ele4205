@@ -22,8 +22,11 @@ suivantes composent le répertoire :
 
 - Obtenez d'abord la chaîne de compilation (SDK) du projet. L'exemple
   ci-dessous montre une installation à l'intérieur du répertoire du projet :
-  ```
-  
+  ```bash
+  mkdir build # Le répertoire `build` est ignoré par git par défaut.
+  cd build
+  cmake ..
+  make
   ```
 
 ## Compilation de la documentation
