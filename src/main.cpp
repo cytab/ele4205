@@ -15,9 +15,9 @@ int main (int argc, char ** argv) {
 		std::cout << "Veuillez fournir la résolution." << std::endl;
 		return -1;
 	}
-	int resX = std::s_toi(std::string(argv[1]));
-	int resY = std::s_toi(std::string(argv[2]));
-	std::string filename = getVideoFileName(CAMERA_ID);
+	int resX = std::stoi(std::string(argv[1]));
+	int resY = std::stoi(std::string(argv[2]));
+	std::string filename = getVideoFileName("046d:0825");
 	boneCVtiming(filename);
-	captureVideo(fileName, 5.0, Resolution{resX, resY}, "capture-liv1.avi");
+	captureVideo(filename, 5.0, Resolution{resX, resY}, "capture-liv1.avi");
 }

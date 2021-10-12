@@ -8,6 +8,16 @@
 #define NOMBRE_DE_FRAME 10
 #define OFFSET_READ 2
 
+/**
+	\var CAMERA_ID Identifiant de la caméra.
+	*/
+const std::string CAMERA_ID = "046d:0825";
+
+/**
+	\var frameSettings Vecteur contenant les variable : resX, resY, fps
+	*/
+std::vector <FrameSetting> frameSettings;
+
 std::string getLsUSB(){
 	FILE *fpipe;
 	char *command = "lsusb";
@@ -26,8 +36,9 @@ std::string getLsUSB(){
 
 std::string getVideoFileName(std::string cameraID){
 	std::string devices = getLsUSB();
+	std::istringstream iss(devices);
 	std::string line;
-	while (std::getline(devices, line)) {
+	while (std::getline(iss, line)) {
 		if (line.find(cameraID) != std::string::npos)
 			break;
 	}
@@ -38,16 +49,18 @@ std::string getVideoFileName(std::string cameraID){
 
 void boneCVtiming(std::string fileName)
 {
-	cv::VideoCapture capture(fileName);
+	cv::VideoCapture capture(0);
 	int n = 0;
 
 	for (auto res : SUPPORTED_RESOLUTIONS){
 		// attribution des résolutions 
-		capture.set(cv::CV_CAP_PROP_FRAME_WIDTH, res.w);
-		capture.set(cv::CV_CAP_PROP_FRAME_HEIGHT, res.h);
+		capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w);
+		capture.set(CV_CAP_PROP_FRAME_HEIGHT, res.h);
 
 		if(!capture.isOpened()){
-			throw std::system_error("Failed to  connect to the camera");
+			throw std::system_error(EDOM,
+				std::generic_category(),
+				"Failed to  connect to the camera");
 		}
 
 		cv::Mat frame;
@@ -64,7 +77,9 @@ void boneCVtiming(std::string fileName)
 		for(int i=0; i<frames; i++){
 			capture >> frame;
 			if(frame.empty()){
-				throw std::system_error("Failed to capture an image");
+				throw std::system_error(EDOM,
+					std::generic_category(),
+					"Failed to capture an image");
 			}
 		}
 
@@ -72,12 +87,13 @@ void boneCVtiming(std::string fileName)
 		double difference = (end.tv_sec - start.tv_sec) + (double)(end.tv_nsec - start.tv_nsec)/1000000000.0;
 		frameSettings.push_back(FrameSetting{res, frames/difference});
 	}
+	std::cout << "Finished bone" << std::endl;
 }
 
 double getFrameFPS(Resolution res){
 	for (auto setting : frameSettings) {
-		if (setting.res.x == res.x && setting.res.y == res.y)
-			return setting.duration;
+		if (setting.res.w == res.w && setting.res.h == res.h)
+			return setting.fps;
 	}
 	return -1;
 }
@@ -87,16 +103,19 @@ void captureVideo(std::string fileName,
 		Resolution res,
 		std::string outputFileName){
 	cv::VideoCapture capture(fileName);
-	capture.set(cv::CV_CAP_PROP_FRAME_WIDTH, res.w);
-	capture.set(cv::CV_CAP_PROP_FRAME_HEIGHT, res.h);
+	capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w);
+	capture.set(CV_CAP_PROP_FRAME_HEIGHT, res.h);
 	if(!capture.isOpened()){
-		throw std::system_error("Failed to  connect to the camera");
+		throw std::system_error(EDOM,
+			std::generic_category(),
+			"Failed to  connect to the camera");
 	}
 	double fps = getFrameFPS(res);
 	int nFrames = (int) (duration * fps);
 
 	cv::VideoWriter writer(outputFileName,
-		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+		CV_FOURCC('M', 'J', 'P', 'G'),
+		//cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
 		fps,
 		cv::Size(res.w, res.h));
 	cv::Mat frame;
@@ -105,7 +124,9 @@ void captureVideo(std::string fileName,
 		capture >> frame;
 		writer.write(frame);
 		if(frame.empty()){
-			throw std::system_error("Failed to capture an image");
+			throw std::system_error(EDOM,
+				std::generic_category(),
+				"Failed to capture an image");
 		}
 	}
 }

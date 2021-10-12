@@ -2,18 +2,18 @@
 	\brief Fichier d'inclusion pour les fonctions de captures de vidéos.
 	*/
 
+#ifndef CAPTURE_HPP
+#define CAPTURE_HPP
+
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <time.h>
 #include <stdlib.h>
 #include <vector>
 #include <exception>
+#include <system_error>
 #include <opencv2/opencv.hpp>
-
-/**
-	\var CAMERA_ID Identifiant de la caméra.
-	*/
-const std::string CAMERA_ID = "046d:0825"
 
 /**
 	\typedef Resolution Structure d'enregistrement d'une résolution.
@@ -48,11 +48,6 @@ typedef struct FrameSetting {
 };
 
 /**
-	\var frameSettings Vecteur contenant les variable : resX, resY, fps
-	*/
-std::vector <FrameSetting> frameSettings = {};
-
-/**
 	\fn getFrameFPS Obtenir la durée d'une image (en : frame) pour une
 		résolution donnée.
 	\return Durée de la prise d'image en secondes ou -1 si la résolution n'est
@@ -78,7 +73,7 @@ std::string getVideoFileName(std::string cameraID);
 	\param fileName fichier de périphérique vidéo
 	\brief Calcule le frame par seconde de chaque résolution
 	*/
-void boneCVtiming(std::string fileName)
+void boneCVtiming(std::string fileName);
 
 /**
 	\fn captureVideo(std::string cameraID,
@@ -94,3 +89,5 @@ void captureVideo(std::string fileName,
 	float duration,
 	Resolution res,
 	std::string outputFileName);
+
+#endif
