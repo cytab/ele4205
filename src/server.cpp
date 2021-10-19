@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
     //Listen
     listen(socket_desc, 3);
     //Accept and incoming connection
+    int onetime = 0;
     while(1)
     {
         memcpy(message, "test connect",13 );
@@ -89,11 +90,12 @@ int main(int argc, char *argv[])
         {
             perror("accept failed");
             return 1;
-        }else{
-            if(sendImage(sock, message) == -1){
+        }else{ 
+            if(sendImage(sock, message) == -1 && onetime != 0){
                 close(sock);
                 return -1;
             }
+            onetime = 1 ;
         }
 
         memcpy(message, "test avec feedback", 19);
