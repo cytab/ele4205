@@ -42,6 +42,12 @@ const Resolution SUPPORTED_RESOLUTIONS[] = {
 	{1280, 960}
 };
 
+/**
+	\struct FrameSetting Structure d'enregistrement de paramètres
+		associés à une résolution.
+	\var res Résolution
+	\var fps Nombre d'images par seconde
+	*/
 typedef struct FrameSetting {
 	Resolution res;
 	double fps;
@@ -56,37 +62,22 @@ typedef struct FrameSetting {
 double getFrameFPS(Resolution res);
 
 /**
-	\fn getVideoFileName
-	\brief Lister les périphériques USB.
-	*/
-std::string getLsUSB();
-
-/**
-	\fn getVideoFileName
-	\brief Obtenir le chemin d'accès de la caméra à partir de son ID.
-	*/
-std::string getVideoFileName(std::string cameraID);
-
-
-/**
 	\fn bonecVtiming
-	\param fileName fichier de périphérique vidéo
-	\brief Calcule le frame par seconde de chaque résolution
+	\brief Calculer le nombre d'images par seconde pour toutes les
+		résolutions supportées.
 	*/
-void boneCVtiming(std::string fileName);
+void boneCVtiming();
 
 /**
 	\fn captureVideo(std::string cameraID,
 		float duration,
 		std::string outputFileName)
 	\brief Capture une séquence vidéo
-	\param fileName Fichier de la caméra
 	\param duration Durée de la capture (en secondes)
 	\param res Résolution à utiliser
 	\param outputFileName Nom du fichier de sortie
 	**/
-void captureVideo(std::string fileName,
-	float duration,
+void captureVideo(float duration,
 	Resolution res,
 	std::string outputFileName);
 

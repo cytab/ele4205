@@ -5,53 +5,18 @@
 
 #include <capture.hpp>
 
-#define NOMBRE_DE_FRAME 10
+#define N_TIME_EVALUATION_FRAMES 10
 #define OFFSET_READ 2
-
-/**
-	\var CAMERA_ID Identifiant de la caméra.
-	*/
-const std::string CAMERA_ID = "046d:0825";
 
 /**
 	\var frameSettings Vecteur contenant les variable : resX, resY, fps
 	*/
 std::vector <FrameSetting> frameSettings;
 
-std::string getLsUSB(){
-	FILE *fpipe;
-	char *command = "lsusb";
-	char c = 0;
-	std::string output;
-	if (0 == (fpipe = (FILE*)popen(command, "r"))) {
-		perror("popen() failed.");
-		return "";
-	}
-	while (fread(&c, sizeof(c), 1, fpipe)) {
-		output += c;
-	}
-	pclose(fpipe);
-	return output;
-}
-
-std::string getVideoFileName(std::string cameraID){
-	std::string devices = getLsUSB();
-	std::istringstream iss(devices);
-	std::string line;
-	while (std::getline(iss, line)) {
-		if (line.find(cameraID) != std::string::npos)
-			break;
-	}
-	std::string busID = line.substr(4, 7);
-	std::string deviceID = line.substr(16, 19);
-	return std::string("/dev/bus/usb/" + busID + "/" + deviceID);
-}
-
-void boneCVtiming(std::string fileName)
+void boneCVtiming()
 {
 	cv::VideoCapture capture(0);
 	int n = 0;
-	std::cout << "*" << std::endl;
 	for (auto res : SUPPORTED_RESOLUTIONS){
 		// attribution des résolutions
 		 
@@ -75,7 +40,7 @@ void boneCVtiming(std::string fileName)
 		struct timespec start, end;
 		clock_gettime(CLOCK_REALTIME, &start);
 
-		int frames = NOMBRE_DE_FRAME;
+		int frames = N_TIME_EVALUATION_FRAMES;
 		for(int i=0; i<frames; i++){
 			capture >> frame;
 			if(frame.empty()){
@@ -88,9 +53,7 @@ void boneCVtiming(std::string fileName)
 		clock_gettime(CLOCK_REALTIME, &end);
 		double difference = (end.tv_sec - start.tv_sec) + (double)(end.tv_nsec - start.tv_nsec)/1000000000.0;
 		frameSettings.push_back(FrameSetting{res, frames/difference});
-		//std::cout << "FPS for " << res.w << "    " << res.h << " : " << frameSettings[frameSettings.size()-1] << std::endl;
 	}
-	std::cout << "Finished bone" << std::endl;
 }
 
 double getFrameFPS(Resolution res){
@@ -118,7 +81,6 @@ void captureVideo(std::string fileName,
 
 	cv::VideoWriter writer(outputFileName,
 		CV_FOURCC('M', 'J', 'P', 'G'),
-		//cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
 		fps,
 		cv::Size(res.w, res.h));
 	cv::Mat frame;
