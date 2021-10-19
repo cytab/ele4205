@@ -36,3 +36,7 @@ Pour compiler la documentation, exécutez, dans le répertoire
 logiciel `doxygen` est nécessaire pour cette opération; s'il ne l'est pas,
 référez-vous à la page du projet en question :
 `https://www.doxygen.nl/index.html`
+
+## Progrès
+
+19 octobre : fin du livrable 1.
