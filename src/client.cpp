@@ -12,6 +12,7 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>
 #include<unistd.h>
+#include "opencv2/highgui/highgui.hpp"
 #include <opencv2/opencv.hpp>
 
 #define PORT_NUMBER 4099
@@ -67,19 +68,23 @@ int main(int argc, char *argv[])
     //Send data to the server
     while(1){
         read_size = recv(hSocket, server_reply, 200, 0);
+	printf("%s\n", server_reply);
 
-        int key = cvWaitKey(30);
+        int key = cv::waitKey(30);
         if(key == ESC){
+		printf("escape\n");
             message = ELE4205_QUIT; 
             send(hSocket, message_data, sizeof(message), 0);
             close(hSocket);
             return 0;
         }else{
+		printf("send OK\n");
             message = ELE4205_OK; 
             send(hSocket, message_data, sizeof(message), 0);
         }
         
     }
+	printf("Close everything\n");
     close(hSocket);
     return 0;
 }

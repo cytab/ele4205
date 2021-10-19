@@ -1,17 +1,20 @@
 cmake_minimum_required(VERSION 2.8)
-project(capture)
+project(odroid)
 set (CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(include/)
 
 link_directories(include/)
-add_executable(${PROJECT_NAME} src/capture.cpp src/main.cpp)
+#add_executable(capture src/capture.cpp src/main.cpp)
+add_executable(server src/server.cpp)
+add_executable(client src/client.cpp)
 
 find_package(OpenCV REQUIRED )
 if(OpenCV_FOUND)
 	include_directories(${OpenCV_INCLUDE_DIRS})
-	target_link_libraries(capture ${OpenCV_LIBRARIES})
+	target_link_libraries(server ${OpenCV_LIBRARIES})
+	target_link_libraries(client ${OpenCV_LIBRARIES})
 else(OpenCV_FOUND)
 	message(FATAL ERROR "Librarie OpenCV introuvable!")
 endif(OpenCV_FOUND)

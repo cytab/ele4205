@@ -75,8 +75,6 @@ int main(int argc, char *argv[])
     }
 
     char* client_m = (char*)&client_message; 
-    //Listen
-    listen(socket_desc, 3);
     //Accept and incoming connection
     while(1)
     {
@@ -84,6 +82,8 @@ int main(int argc, char *argv[])
 
         clientLen = sizeof(struct sockaddr_in);
         //accept connection from an incoming client
+	//Listen
+	listen(socket_desc, 3);
         sock = accept(socket_desc,(struct sockaddr *)&client,(socklen_t*)&clientLen);
         if (sock < 0)
         {
