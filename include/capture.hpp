@@ -69,8 +69,7 @@ double getFrameFPS(Resolution res);
 void boneCVtiming();
 
 /**
-	\fn captureVideo(std::string cameraID,
-		float duration,
+	\fn captureVideo(float duration,
 		std::string outputFileName)
 	\brief Capture une séquence vidéo
 	\param duration Durée de la capture (en secondes)
