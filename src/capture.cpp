@@ -64,8 +64,7 @@ double getFrameFPS(Resolution res){
 	return -1;
 }
 
-void captureVideo(std::string fileName,
-		float duration,
+void captureVideo(float duration,
 		Resolution res,
 		std::string outputFileName){
 	cv::VideoCapture capture(0);
