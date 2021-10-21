@@ -34,7 +34,7 @@ int SocketConnect(int hSocket)
     int iRetval=-1;
     struct sockaddr_in remote= {0};
     remote.sin_addr.s_addr = inet_addr("192.168.7.2"); //Local Host
-    remote.sin_family = AF_INET;
+    remote.sin_family = PF_INET;
     remote.sin_port = htons(PORT_NUMBER);
     iRetval = connect(hSocket,(struct sockaddr *)&remote,sizeof(struct sockaddr_in));
     return iRetval;
@@ -48,8 +48,7 @@ int main(int argc, char *argv[])
     // Donnees a envoyer vers le serveurs
     uint32_t message;
     char* message_data = (char*)&message;
-    // image recue
-    char server_reply[200] = {0};
+
     //Create socket
     hSocket = SocketCreate();
 
@@ -68,9 +67,19 @@ int main(int argc, char *argv[])
     }
     printf("Sucessfully conected with server\n");
     //Send data to the server
+           cv::Mat frame;
+        frame = cv::Mat::zeros(480 , 640, CV_8UC3);    
+        int imgSize = frame.total() * frame.elemSize();
+        uchar *iptr = frame.data;
+        int bytes = 0;
+        int key;
+
+        //make img continuos
+        if ( ! frame.isContinuous() ) { 
+            frame = frame.clone();
+        }
     while(1){
-        read_size = recv(hSocket, server_reply, 200, 0);
-	printf("%s\n", server_reply);
+        read_size = recv(hSocket, iptr, imgSize, MSG_WAITALL);
 
         int key = cv::waitKey(30);
         if(key == ESC){

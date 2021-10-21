@@ -19,11 +19,13 @@
 #define ELE4205_OK 0b1
 #define ELE4205_QUIT 0b10
 
-int sendImage(cv::VideoCapture capture,cv::Mat frame , int sock, int bytes, int imageSize){
+int sendImage(cv::VideoCapture capture,cv::Mat frame, cv::Mat flippedFrame , int sock, int bytes, int imageSize){
     // Send some dataà
     capture >> frame;
+    // flip the frame
+    flip(frame, flippedFrame, 1);
     if(!frame.empty()){
-        if((bytes = send(sock,frame.data,imageSize,0))<0){
+        if((bytes = send(sock,flippedFrame.data,imageSize,0))<0){
             std::cout << "Error while sending..";
         }
    }
@@ -91,7 +93,7 @@ int main(int argc, char *argv[])
 			"Failed to  connect to the camera");
 	}
 
-    cv::Mat frame;
+    cv::Mat frame, flippedFrame;
     frame = cv::Mat::zeros(480,640,CV_8UC3);
     if (!frame.isContinuous()){
         frame = frame.clone();
@@ -123,7 +125,7 @@ int main(int argc, char *argv[])
             perror("accept failed");
             return 1;
         }else{ 
-            if(sendImage(capture, frame, sock, bytes, imageSize) == -1 && onetime != 0){
+            if(sendImage(capture, frame,flippedFrame, sock, bytes, imageSize) == -1 && onetime != 0){
                 close(sock);
                 return -1;
             }
@@ -141,7 +143,7 @@ int main(int argc, char *argv[])
 
         if(ELE4205_OK == client_message)
         {
-            if(sendImage(capture, frame, sock, bytes, imageSize) == -1){
+            if(sendImage(capture, frame, flippedFrame, sock, bytes, imageSize) == -1){
                 close(sock);
                 return -1;
             }
