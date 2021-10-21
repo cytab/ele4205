@@ -52,11 +52,13 @@ int main(int argc, char *argv[])
     char server_reply[200] = {0};
     //Create socket
     hSocket = SocketCreate();
+
     if(hSocket == -1)
     {
         printf("Could not create socket\n");
         return 1;
     }
+    
     printf("Socket is created\n");
     //Connect to remote server
     if (SocketConnect(hSocket) < 0)
@@ -78,7 +80,7 @@ int main(int argc, char *argv[])
             close(hSocket);
             return 0;
         }else{
-		printf("send OK\n");
+		    printf("send OK\n");
             message = ELE4205_OK; 
             send(hSocket, message_data, sizeof(message), 0);
         }

@@ -7,27 +7,31 @@
  * **/
 #include<stdio.h>
 #include<string.h>
+#include <sys/types.h>
 #include<sys/socket.h>
 #include<arpa/inet.h>
 #include<unistd.h>
+#include <sys/types.h>
+#include "opencv2/highgui/highgui.hpp"
+#include <opencv2/opencv.hpp>
 
 #define PORT_NUMBER 4099
 #define ELE4205_OK 0b1
 #define ELE4205_QUIT 0b10
 
-int sendImage(int sock, char* message){
-    // Send some data
-    if( send(sock, message, strlen(message), 0) < 0)
-    {
-        printf("Send failed");
-        return -1;
-    }
-    return 1;
+int sendImage(cv::VideoCapture capture,cv::Mat frame , int sock, int bytes, int imageSize){
+    // Send some dataà
+    capture >> frame;
+    if(!frame.empty()){
+        if((bytes = send(sock,frame.data,imageSize,0))<0){
+            std::cout << "Error while sending..";
+        }
+   }
 }
 
 short SocketCreate(void)
 {
-    short hSocket;
+    int hSocket;
     printf("Create the socket\n");
     hSocket = socket(AF_INET, SOCK_STREAM, 0);
     return hSocket;
@@ -39,7 +43,8 @@ int BindCreatedSocket(int hSocket, int p)
 {
     int iRetval=-1;
     int ClientPort = p;
-    struct sockaddr_in  remote= {0};
+    struct sockaddr_in  remote;
+     memset(&remote, 0, sizeof(remote));       // Zero out structure
     /* Internet address family */
     remote.sin_family = AF_INET;
     /* Any incoming interface */
@@ -48,6 +53,8 @@ int BindCreatedSocket(int hSocket, int p)
     iRetval = bind(hSocket,(struct sockaddr *)&remote,sizeof(remote));
     return iRetval;
 }
+
+
 int main(int argc, char *argv[])
 {
     // 
@@ -75,23 +82,48 @@ int main(int argc, char *argv[])
     }
 
     char* client_m = (char*)&client_message; 
+    cv::VideoCapture capture(0);
+	//capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w);
+	//capture.set(CV_CAP_PROP_FRAME_HEIGHT, res.h);
+	if(!capture.isOpened()){
+		throw std::system_error(EDOM,
+			std::generic_category(),
+			"Failed to  connect to the camera");
+	}
+
+    cv::Mat frame;
+    frame = cv::Mat::zeros(480,640,CV_8UC3);
+    if (!frame.isContinuous()){
+        frame = frame.clone();
+    }
+
+    int imageSize = frame.total()*frame.elemSize();
+    int bytes = 0;
+
+    capture.set(CV_CAP_PROP_FORMAT,CV_8UC3);
     //Accept and incoming connection
     int onetime = 0;
-    while(1)
+    listen(socket_desc, 5);
+
+    for (;;)
     {
+                //make img continuos
+        if ( ! frame.isContinuous() ) { 
+            frame = frame.clone();
+        }
+
         memcpy(message, "test connect",13 );
 
         clientLen = sizeof(struct sockaddr_in);
         //accept connection from an incoming client
-	//Listen
-	listen(socket_desc, 3);
+
         sock = accept(socket_desc,(struct sockaddr *)&client,(socklen_t*)&clientLen);
         if (sock < 0)
         {
             perror("accept failed");
             return 1;
         }else{ 
-            if(sendImage(sock, message) == -1 && onetime != 0){
+            if(sendImage(capture, frame, sock, bytes, imageSize) == -1 && onetime != 0){
                 close(sock);
                 return -1;
             }
@@ -101,7 +133,7 @@ int main(int argc, char *argv[])
         memcpy(message, "test avec feedback", 19);
 
         //Receive a reply from the client
-        if( recv(sock, client_m, sizeof(uint32_t), 0) < 0)
+        if( ssize_t numBytesRcvd = recv(sock, client_m, sizeof(uint32_t), 0) < 0)
         {
             printf("recv failed");
             break;
@@ -109,7 +141,7 @@ int main(int argc, char *argv[])
 
         if(ELE4205_OK == client_message)
         {
-            if(sendImage(sock, message) == -1){
+            if(sendImage(capture, frame, sock, bytes, imageSize) == -1){
                 close(sock);
                 return -1;
             }
