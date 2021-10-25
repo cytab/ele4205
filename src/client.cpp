@@ -69,22 +69,22 @@ int main(int argc, char *argv[])
     printf("Sucessfully conected with server\n");
     //receive first header of mat object 
 	char *entete ;
-        read_size = recv(hSocket, entete, sizeof(*entete), MSG_WAITALL);
+    read_size = recv(hSocket, entete, sizeof(*entete), MSG_WAITALL);
 	cv::Mat* frame = reinterpret_cast<cv::Mat*>(entete);
 
-        uchar *iptr = frame->data;
-
+    uchar *iptr = frame->data;
+    int imgSize = frame->total() * frame->elemSize();
         //make img continuos
-        if ( ! frame.isContinuous() ) { 
-            frame = frame.clone();
-        }
+    if ( ! frame->isContinuous() ) { 
+         *frame = frame->clone();
+    }
     while(1){
 	
         // receive first frame and additionnal frame 
         read_size = recv(hSocket, iptr, imgSize, MSG_WAITALL);
-        cv::namedWindow(Show camera"); // Create a window
+        cv::namedWindow("Show camera"); // Create a window
 
-        cv::imshow("FRAME", frame); 
+        imshow("FRAME", *frame); 
         int bytes = 0;
 
         int key = cv::waitKey(30);

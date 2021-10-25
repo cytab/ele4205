@@ -21,9 +21,9 @@
 
 
 int sendEntete(cv::Mat frame,int sock){	
-
+    int bytes ;
     char* entete = reinterpret_cast<char *>(&frame);
-    if((bytes = send(sock,entete,sizeof(*entete),0))<0){
+    if(( bytes = send(sock,entete,sizeof(*entete),0)) < 0){
             std::cout << "Error while sending..";
 	    return -1;
     }
@@ -85,7 +85,6 @@ int main(int argc, char *argv[])
 
     uint32_t client_message = 0;
     // char test -> apres image
-    char message[100] = {0};
 
     //Create socket
     socket_desc = SocketCreate();
@@ -103,6 +102,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     
+
     char* client_m = (char*)&client_message; 
     cv::VideoCapture capture(0);
 	//capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w);
@@ -115,8 +115,10 @@ int main(int argc, char *argv[])
     if (!frame.isContinuous()){
         frame = frame.clone();
     }
+
     int imageSize = frame.total()*frame.elemSize();
     int bytes = 0;
+    std::cout  << "here ";
     capture.set(CV_CAP_PROP_FORMAT,CV_8UC3);
     //Accept and incoming connection
     int onetime = 0;
@@ -131,6 +133,7 @@ int main(int argc, char *argv[])
 
         clientLen = sizeof(struct sockaddr_in);
         //accept connection from an incoming client
+
         sock = accept(socket_desc,(struct sockaddr *)&client,(socklen_t*)&clientLen);
         if (sock < 0)
         {
