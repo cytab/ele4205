@@ -88,9 +88,7 @@ int main(int argc, char *argv[])
 	//capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w);
 	//capture.set(CV_CAP_PROP_FRAME_HEIGHT, res.h);
 	if(!capture.isOpened()){
-		throw std::system_error(EDOM,
-			std::generic_category(),
-			"Failed to  connect to the camera");
+			std:: cout << "Failed to  connect to the camera" ;
 	}
 
     cv::Mat frame, flippedFrame;
