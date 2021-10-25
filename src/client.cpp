@@ -71,8 +71,6 @@ int main(int argc, char *argv[])
         frame = cv::Mat::zeros(480 , 640, CV_8UC3);    
         int imgSize = frame.total() * frame.elemSize();
         uchar *iptr = frame.data;
-        int bytes = 0;
-        int key;
 
         //make img continuos
         if ( ! frame.isContinuous() ) { 
@@ -80,6 +78,11 @@ int main(int argc, char *argv[])
         }
     while(1){
         read_size = recv(hSocket, iptr, imgSize, MSG_WAITALL);
+        cv::namedWindow("The Guitar"); // Create a window
+
+        cv::imshow("The Guitar", frame); 
+        int bytes = 0;
+        int key;
 
         int key = cv::waitKey(30);
         if(key == ESC){
@@ -93,7 +96,7 @@ int main(int argc, char *argv[])
             message = ELE4205_OK; 
             send(hSocket, message_data, sizeof(message), 0);
         }
-        
+         uchar *iptr = frame.data;
     }
 	printf("Close everything\n");
     close(hSocket);
