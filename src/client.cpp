@@ -82,7 +82,6 @@ int main(int argc, char *argv[])
 
         cv::imshow("The Guitar", frame); 
         int bytes = 0;
-        int key;
 
         int key = cv::waitKey(30);
         if(key == ESC){

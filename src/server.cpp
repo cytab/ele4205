@@ -82,7 +82,8 @@ int main(int argc, char *argv[])
         perror("bind failed.");
         return 1;
     }
-
+    
+    printf("olayinka say shit\n");
     char* client_m = (char*)&client_message; 
     cv::VideoCapture capture(0);
 	//capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w);
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
 
     int imageSize = frame.total()*frame.elemSize();
     int bytes = 0;
-    std::cout  << "here ";
+    printf("olayinka is hungry\n");
     capture.set(CV_CAP_PROP_FORMAT,CV_8UC3);
     //Accept and incoming connection
     int onetime = 0;
@@ -112,25 +113,22 @@ int main(int argc, char *argv[])
             frame = frame.clone();
         }
 
-        memcpy(message, "test connect",13 );
-
         clientLen = sizeof(struct sockaddr_in);
         //accept connection from an incoming client
-
+	printf("olayinka wants to go home\n");
         sock = accept(socket_desc,(struct sockaddr *)&client,(socklen_t*)&clientLen);
         if (sock < 0)
         {
             perror("accept failed");
             return 1;
         }else{ 
+ 	
             if(sendImage(capture, frame,flippedFrame, sock, bytes, imageSize) == -1 && onetime != 0){
                 close(sock);
                 return -1;
             }
             onetime = 1 ;
         }
-
-        memcpy(message, "test avec feedback", 19);
 
         //Receive a reply from the client
         if( ssize_t numBytesRcvd = recv(sock, client_m, sizeof(uint32_t), 0) < 0)
