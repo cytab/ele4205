@@ -33,8 +33,9 @@ int SocketConnect(int hSocket)
 {
     int iRetval=-1;
     struct sockaddr_in remote= {0};
-    remote.sin_addr.s_addr = inet_addr("192.168.7.2"); //Local Host
-    remote.sin_family = PF_INET;
+    //remote.sin_addr.s_addr = inet_addr("192.168.7.2"); //Local Host
+    remote.sin_addr.s_addr = inet_addr(INADDR_ANY);
+    remote.sin_family = AF_INET;
     remote.sin_port = htons(PORT_NUMBER);
     iRetval = connect(hSocket,(struct sockaddr *)&remote,sizeof(struct sockaddr_in));
     return iRetval;
