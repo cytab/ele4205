@@ -5,12 +5,12 @@
  * auhtor :
  * 
  * **/
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
-#include<sys/socket.h>
-#include<arpa/inet.h>
-#include<unistd.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/opencv.hpp>
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 
     int imageSize = frame.total()*frame.elemSize();
     int bytes = 0;
-
+    std::cout  << "here ";
     capture.set(CV_CAP_PROP_FORMAT,CV_8UC3);
     //Accept and incoming connection
     int onetime = 0;
