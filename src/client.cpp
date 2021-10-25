@@ -34,7 +34,7 @@ int SocketConnect(int hSocket)
     int iRetval=-1;
     struct sockaddr_in remote= {0};
     //remote.sin_addr.s_addr = inet_addr("192.168.7.2"); //Local Host
-    remote.sin_addr.s_addr = inet_addr(INADDR_ANY);
+    remote.sin_addr.s_addr = inet_addr("127.0.0.1");
     remote.sin_family = AF_INET;
     remote.sin_port = htons(PORT_NUMBER);
     iRetval = connect(hSocket,(struct sockaddr *)&remote,sizeof(struct sockaddr_in));
@@ -67,26 +67,29 @@ int main(int argc, char *argv[])
         return 1;
     }
     printf("Sucessfully conected with server\n");
-    //Send data to the server
-           cv::Mat frame;
-        frame = cv::Mat::zeros(480 , 640, CV_8UC3);    
-        int imgSize = frame.total() * frame.elemSize();
-        uchar *iptr = frame.data;
+    //receive first header of mat object 
+	char *entete ;
+        read_size = recv(hSocket, entete, sizeof(*entete), MSG_WAITALL);
+	cv::Mat* frame = reinterpret_cast<cv::Mat*>(entete);
+
+        uchar *iptr = frame->data;
 
         //make img continuos
         if ( ! frame.isContinuous() ) { 
             frame = frame.clone();
         }
     while(1){
+	
+        // receive first frame and additionnal frame 
         read_size = recv(hSocket, iptr, imgSize, MSG_WAITALL);
-        cv::namedWindow("The Guitar"); // Create a window
+        cv::namedWindow(Show camera"); // Create a window
 
-        cv::imshow("The Guitar", frame); 
+        cv::imshow("FRAME", frame); 
         int bytes = 0;
 
         int key = cv::waitKey(30);
         if(key == ESC){
-		printf("escape\n");
+	    printf("escape\n");
             message = ELE4205_QUIT; 
             send(hSocket, message_data, sizeof(message), 0);
             close(hSocket);
@@ -96,7 +99,6 @@ int main(int argc, char *argv[])
             message = ELE4205_OK; 
             send(hSocket, message_data, sizeof(message), 0);
         }
-         uchar *iptr = frame.data;
     }
 	printf("Close everything\n");
     close(hSocket);

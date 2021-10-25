@@ -19,17 +19,37 @@
 #define ELE4205_OK 0b1
 #define ELE4205_QUIT 0b10
 
-int sendImage(cv::VideoCapture capture,cv::Mat frame, cv::Mat flippedFrame , int sock, int bytes, int imageSize){
-    // Send some dataà
-    capture >> frame;
-    // flip the frame
-    flip(frame, flippedFrame, 1);
-    if(!frame.empty()){
-        if((bytes = send(sock,flippedFrame.data,imageSize,0))<0){
+
+int sendEntete(cv::Mat frame,int sock){	
+
+    char* entete = reinterpret_cast<char *>(&frame);
+    if((bytes = send(sock,entete,sizeof(*entete),0))<0){
             std::cout << "Error while sending..";
+	    return -1;
+    }
+    return 0;    
+}
+ 
+
+int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int bytes, int imageSize, int flag){
+    capture >> frame;
+    // Send some data
+    if (flag == 0){
+	sendEntete(frame, sock);
+
+     }	
+    
+    // send data
+    if(!frame.empty()){
+        if((bytes = send(sock,frame.data,imageSize,0))<0){
+            std::cout << "Error while sending..";
+	    return -1;
         }
    }
+   return 0;
+	
 }
+
 
 short SocketCreate(void)
 {
@@ -83,24 +103,20 @@ int main(int argc, char *argv[])
         return 1;
     }
     
-    printf("olayinka say shit\n");
     char* client_m = (char*)&client_message; 
     cv::VideoCapture capture(0);
 	//capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w);
 	//capture.set(CV_CAP_PROP_FRAME_HEIGHT, res.h);
 	if(!capture.isOpened()){
-			std:: cout << "Failed to  connect to the camera" ;
+		std:: cout << "Failed to  connect to the camera" ;
 	}
 
-    cv::Mat frame, flippedFrame;
-    frame = cv::Mat::zeros(480,640,CV_8UC3);
+    cv::Mat frame;
     if (!frame.isContinuous()){
         frame = frame.clone();
     }
-
     int imageSize = frame.total()*frame.elemSize();
     int bytes = 0;
-    printf("olayinka is hungry\n");
     capture.set(CV_CAP_PROP_FORMAT,CV_8UC3);
     //Accept and incoming connection
     int onetime = 0;
@@ -108,14 +124,13 @@ int main(int argc, char *argv[])
 
     for (;;)
     {
-                //make img continuos
+        //make img continuos
         if ( ! frame.isContinuous() ) { 
             frame = frame.clone();
         }
 
         clientLen = sizeof(struct sockaddr_in);
         //accept connection from an incoming client
-	printf("olayinka wants to go home\n");
         sock = accept(socket_desc,(struct sockaddr *)&client,(socklen_t*)&clientLen);
         if (sock < 0)
         {
@@ -123,7 +138,7 @@ int main(int argc, char *argv[])
             return 1;
         }else{ 
  	
-            if(sendImage(capture, frame,flippedFrame, sock, bytes, imageSize) == -1 && onetime != 0){
+            if(sendImage(capture, frame, sock, bytes, imageSize, 0) == -1 && onetime != 0){
                 close(sock);
                 return -1;
             }
@@ -139,7 +154,7 @@ int main(int argc, char *argv[])
 
         if(ELE4205_OK == client_message)
         {
-            if(sendImage(capture, frame, flippedFrame, sock, bytes, imageSize) == -1){
+            if(sendImage(capture, frame, sock, bytes, imageSize, 1) == -1){
                 close(sock);
                 return -1;
             }
