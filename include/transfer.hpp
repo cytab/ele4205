@@ -27,6 +27,12 @@
 #define ESC 27
 #define WINDOW_NAME "Transfert d'images"
 
+#ifdef Debug
+#define log_info(x)	std::cout << x << std::endl;
+#else
+#define log_info(x) 
+#endif
+
 // Signatures des fonctions client.
 /**
  * Créer un connecteur réseau (socket) pour interagir avec le serveur.

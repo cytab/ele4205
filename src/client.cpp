@@ -1,9 +1,5 @@
-/**
- * 
- * Inspiré par
- * https://aticleworld.com/socket-programming-in-c-using-tcpip/
- * 
- * **/
+// Inspiré par
+// https://aticleworld.com/socket-programming-in-c-using-tcpip/
 
 #include "transfer.hpp"
 
@@ -30,57 +26,57 @@ int main(int argc, char *argv[])
 	hSocket = SocketCreate();
 
 	if(hSocket == -1) {
-		printf("Could not create socket\n");
+		log_info("Could not create socket");
 		return 1;
 	}
 
-	printf("Socket is created\n");
+	log_info("Socket is created");
 	//Connect to remote server
 	if (SocketConnect(hSocket) < 0) {
-		perror("connect failed.\n");
+		log_info("connect failed.\n");
 		return 1;
 	}
-	printf("Sucessfully conected with server\n");
+	log_info("Sucessfully conected with server");
 	//receive first header of mat object 
 	char *entete ;
 	read_size = recv(hSocket, entete, sizeof(cv::Mat),0);
 	cv::Mat* head = reinterpret_cast<cv::Mat*>(entete); 
 
-	printf("Start messgae sending\n");
+	log_info("Start messgae sending");
 
-	std::cout << head->rows << head->cols << std::endl;
+	//std::cout << head->rows << head->cols << std::endl; // TODO
 	int imgSize = head->rows * head->cols * CV_ELEM_SIZE(head->flags);
 	uchar* sockData = new uchar[imgSize];
-	std::cout << std::hex << &sockData[0] << std::endl;
-	printf("Start messgae sending1\n");
+	//std::cout << std::hex << &sockData[0] << std::endl; // TODO
+	log_info("Start messgae sending1");
 	while(1) {
 		int bytes = 0;
 		// receive first frame and additionnal frame
 		for (int i = 0; i < imgSize; i += bytes) {
 			if ((bytes = recv(hSocket, sockData+i, imgSize-i, 0)) == -1){ // TODO
-				printf("reception error\n");	
+				log_info("reception error");	
 			}
 		};
 		cv::Mat frame(head->rows,head->cols, head->type(), sockData);
 		cv::namedWindow(WINDOW_NAME); // Create a window
-		printf("afficher image\n");
+		log_info("afficher image");
 		cv::imshow("FRAME", frame);
-		printf("afficher image1\n");
+		log_info("afficher image1");
 		int key = cv::waitKey(30)&0xFF;
 		if(key == ESC){
-			printf("escape\n");
+			log_info("escape");
 			message = ELE4205_QUIT; 
 			send(hSocket, message_data, sizeof(uint32_t), 0);
 			close(hSocket);
 			return 0;
 		}else{
-			printf("send OK\n");
+			log_info("send OK");
 			message = ELE4205_OK; 
 			send(hSocket, message_data, sizeof(uint32_t), 0);
-			printf("send OK1\n");
+			log_info("send OK1");
 		}
 	}
-	printf("Close everything\n");
+	log_info("Close everything");
 	delete sockData ; 
 	close(hSocket);
 	return 0;

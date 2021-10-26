@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include/)
 
 link_directories(include/)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDebug")
 #add_executable(capture src/capture.cpp src/main.cpp)
 add_executable(server src/server.cpp)
 add_executable(client src/client.cpp)

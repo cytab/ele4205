@@ -1,9 +1,5 @@
-/**
- * 
- * Inspiré par :
- * https://aticleworld.com/socket-programming-in-c-using-tcpip/
- * 
- * **/
+// Inspiré par :
+// https://aticleworld.com/socket-programming-in-c-using-tcpip/
 
 #include "transfer.hpp"
 
@@ -12,7 +8,7 @@ int sendEntete(cv::Mat frame,int sock){
 	cv::Mat* enteteframe = new cv::Mat(frame) ; 
 	char* entete = reinterpret_cast<char *>(enteteframe);
 	if(( bytes = send(sock,entete,sizeof(cv::Mat),0)) < 0){
-		std::cout << "Error while sending..";
+		log_info("Error while sending..");
 		return -1;
 	}
 	delete enteteframe ;
@@ -29,14 +25,14 @@ int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int bytes, int f
 	}
 
 	// send datarecv
-	std::cout <<"frame process\n" << std::endl;
+	log_info("frame process");
 	if(!frame.empty()){
 		if((bytes = write(sock,frame.data,imageSize))<0){
-			std::cout << "Error while sending..";
+			log_info("Error while sending..");
 			return -1;
 		}
 	}
-	std::cout <<"frame process2\n" << std::endl;
+	log_info("frame process2");
 	return 0;
 }
 
@@ -57,6 +53,14 @@ int BindCreatedSocket(int hSocket, int p)
 
 int main(int argc, char *argv[])
 {
+	// Déterminer la résolution (par défaut ou spécifiée)
+	int resW = -1;
+	int resH = -1;
+	if (argc == 3){
+		resW = std::stoi(std::string(argv[1]));
+		resH = std::stoi(std::string(argv[2]));;
+	}
+
 	int socket_desc, sock, clientLen ; 
 	struct sockaddr_in server, client;
 
@@ -66,7 +70,7 @@ int main(int argc, char *argv[])
 	// Create socket
 	socket_desc = SocketCreate();
 	if (socket_desc == -1) {
-		printf("Could not create socket");
+		log_info("Could not create socket");
 		return 1;
 	}
 
@@ -77,28 +81,29 @@ int main(int argc, char *argv[])
 	}
 
 	cv::VideoCapture capture(0);
-	//capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w); // TODO
-	//capture.set(CV_CAP_PROP_FRAME_HEIGHT, res.h);
-	if(!capture.isOpened()){
-		std::cout << "Failed to  connect to the camera" ;
+	if (resW > 0 && resH > 0){
+		capture.set(CV_CAP_PROP_FRAME_WIDTH, resW); // TODO
+		capture.set(CV_CAP_PROP_FRAME_HEIGHT, resH);
 	}
-
+	if(!capture.isOpened()){
+		log_info("Failed to  connect to the camera");
+	}
 	cv::Mat frame;
 
 	int bytes = 0;
-	printf("Capture video\n");
+	log_info("Capture video");
 	capture.set(CV_CAP_PROP_FORMAT,CV_8UC3);
 	// Accept and incoming connection
 	listen(socket_desc, 5);
 	clientLen = sizeof(struct sockaddr_in);
 	//accept connection from an incoming client
-	std::cout <<"about to acccept" << std::endl;
+	log_info("about to acccept");
 	sock = accept(socket_desc,(struct sockaddr *)&client,(socklen_t*)&clientLen);
 	if (sock < 0){
 		perror("accept failed");
 		return 1;
 	} else { 
-		std::cout <<"accept connection\n" << std::endl;
+		log_info("accept connection");
 		if(sendImage(capture, frame, sock, bytes, 0) == -1){
 			close(sock);
 			return -1;
@@ -106,20 +111,22 @@ int main(int argc, char *argv[])
 	}
 
 	for (;;) {
-		std::cout <<"communication\n" << std::endl;
+		log_info("communication");
 		// Receive a reply from the client
 		int numBytesRcvd = 0;
 		// receive first frame and additionnal frame
 		for (int i = 0; i < sizeof(uint32_t); i += numBytesRcvd) {
 			if ((numBytesRcvd = recv(sock, &client_message, sizeof(uint32_t), 0)) == -1) {
-				printf("reception error\n");	
+				log_info("reception error");	
 			}
 		};
-		std::cout <<"communication1\n" << std::endl;
+		log_info("communication1");
 		if(ELE4205_OK == client_message) {
-			std::cout <<"ok recu\n" << std::endl;
+			log_info("ok recu");
 			int result = sendImage(capture, frame, sock, bytes, 1);
-			std::cout << "Resultat : " << result << std::endl;
+			log_info(std::string("Resultat : ")
+				+ std::to_string(result)
+				+ std::string("\n"));
 			if(result == -1){
 				close(sock);
 				return -1;

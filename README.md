@@ -29,6 +29,9 @@ cmake ..
 make
 ```
 
+Pour inclure des informations de débogage, remplacez la command `cmake ..`
+par `cmake -DCMAKE_BUILD_TYPE="Debug" ..`
+
 ## Compilation de la documentation
 
 Pour compiler la documentation, exécutez, dans le répertoire
