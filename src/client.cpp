@@ -33,8 +33,8 @@ int SocketConnect(int hSocket)
 {
     int iRetval=-1;
     struct sockaddr_in remote= {0};
-    //remote.sin_addr.s_addr = inet_addr("192.168.7.2"); //Local Host
-    remote.sin_addr.s_addr = inet_addr("127.0.0.1");
+    remote.sin_addr.s_addr = inet_addr("192.168.7.2"); //Local Host
+    //remote.sin_addr.s_addr = inet_addr("127.0.0.1");
     remote.sin_family = AF_INET;
     remote.sin_port = htons(PORT_NUMBER);
     iRetval = connect(hSocket,(struct sockaddr *)&remote,sizeof(struct sockaddr_in));
@@ -68,26 +68,34 @@ int main(int argc, char *argv[])
     }
     printf("Sucessfully conected with server\n");
     //receive first header of mat object 
-	char *entete ;
-    read_size = recv(hSocket, entete, sizeof(*entete), MSG_WAITALL);
-	cv::Mat* frame = reinterpret_cast<cv::Mat*>(entete);
+    char *entete ;
+    read_size = recv(hSocket, entete, sizeof(cv::Mat),0);
+    cv::Mat* head = reinterpret_cast<cv::Mat*>(entete); 
+    
 
-    uchar *iptr = frame->data;
-    int imgSize = frame->total() * frame->elemSize();
-        //make img continuos
-    if ( ! frame->isContinuous() ) { 
-         *frame = frame->clone();
-    }
+    printf("Start messgae sending\n");
+
+    std::cout << head->rows << head->cols << std::endl;
+    int imgSize = head->rows * head->cols * CV_ELEM_SIZE(head->flags);
+    uchar* sockData = new uchar[imgSize];
+    std::cout << std::hex << &sockData[0] << std::endl;
+    printf("Start messgae sending1\n");
     while(1){
-	
-        // receive first frame and additionnal frame 
-        read_size = recv(hSocket, iptr, imgSize, MSG_WAITALL);
+	int bytes = 0;
+        // receive first frame and additionnal frame
+	for (int i = 0; i < imgSize; i += bytes) {
+    		if ((bytes = recv(hSocket, sockData+i, imgSize-i, 0)) == -1){
+			printf("reception error\n");	
+		}
+       			
+	};
+	cv::Mat frame(head->rows,head->cols, head->type(), sockData);
+	//cout << &frame.data << std::endl;
         cv::namedWindow("Show camera"); // Create a window
-
-        imshow("FRAME", *frame); 
-        int bytes = 0;
-
-        int key = cv::waitKey(30);
+	printf("afficher image\n");
+        cv::imshow("FRAME", frame);
+        printf("afficher image1\n");
+        int key = cv::waitKey(30)&0xFF;
         if(key == ESC){
 	    printf("escape\n");
             message = ELE4205_QUIT; 
@@ -95,7 +103,7 @@ int main(int argc, char *argv[])
             close(hSocket);
             return 0;
         }else{
-		    printf("send OK\n");
+            printf("send OK\n");
             message = ELE4205_OK; 
             send(hSocket, message_data, sizeof(message), 0);
         }

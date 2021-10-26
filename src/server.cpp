@@ -22,8 +22,9 @@
 
 int sendEntete(cv::Mat frame,int sock){	
     int bytes ;
-    char* entete = reinterpret_cast<char *>(&frame);
-    if(( bytes = send(sock,entete,sizeof(*entete),0)) < 0){
+    cv::Mat* enteteframe = new cv::Mat(frame) ; 
+    char* entete = reinterpret_cast<char *>(enteteframe);
+    if(( bytes = send(sock,entete,sizeof(cv::Mat),0)) < 0){
             std::cout << "Error while sending..";
 	    return -1;
     }
@@ -31,15 +32,16 @@ int sendEntete(cv::Mat frame,int sock){
 }
  
 
-int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int bytes, int imageSize, int flag){
+int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int bytes, int flag){
     capture >> frame;
+    int imageSize = frame.total()*frame.elemSize();
     // Send some data
     if (flag == 0){
 	sendEntete(frame, sock);
 
      }	
     
-    // send data
+    // send datarecv
     if(!frame.empty()){
         if((bytes = send(sock,frame.data,imageSize,0))<0){
             std::cout << "Error while sending..";
@@ -76,7 +78,6 @@ int BindCreatedSocket(int hSocket, int p)
     return iRetval;
 }
 
-
 int main(int argc, char *argv[])
 {
     // 
@@ -112,13 +113,8 @@ int main(int argc, char *argv[])
 	}
 
     cv::Mat frame;
-    if (!frame.isContinuous()){
-        frame = frame.clone();
-    }
 
-    int imageSize = frame.total()*frame.elemSize();
     int bytes = 0;
-    std::cout  << "here ";
     capture.set(CV_CAP_PROP_FORMAT,CV_8UC3);
     //Accept and incoming connection
     int onetime = 0;
@@ -141,7 +137,7 @@ int main(int argc, char *argv[])
             return 1;
         }else{ 
  	
-            if(sendImage(capture, frame, sock, bytes, imageSize, 0) == -1 && onetime != 0){
+            if(sendImage(capture, frame, sock, bytes, 0) == -1 && onetime != 0){
                 close(sock);
                 return -1;
             }
@@ -157,7 +153,7 @@ int main(int argc, char *argv[])
 
         if(ELE4205_OK == client_message)
         {
-            if(sendImage(capture, frame, sock, bytes, imageSize, 1) == -1){
+            if(sendImage(capture, frame, sock, bytes, 1) == -1){
                 close(sock);
                 return -1;
             }
