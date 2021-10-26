@@ -1,7 +1,11 @@
 // Inspiré par
 // https://aticleworld.com/socket-programming-in-c-using-tcpip/
 
+#include "capture.hpp"
 #include "transfer.hpp"
+
+int currentResolutionIndex = INITIAL_RES_INDEX;
+uint32_t resMask = 0;
 
 int SocketConnect(int hSocket)
 {
@@ -13,6 +17,47 @@ int SocketConnect(int hSocket)
 	iRetval = connect(hSocket,(struct sockaddr *)&remote,
 		sizeof(struct sockaddr_in));
 	return iRetval;
+}
+
+void mouseCallBack(int event, int x, int y, int flags, void* userdata)
+{
+	int lowestY = FIRST_BUTTON_Y - TEXT_HEIGHT;
+	int index = -1;
+	if  (event == cv::EVENT_LBUTTONDOWN ) {
+		for (int i = 0; i < sizeof(CAMERA_RESOLUTIONS); i++) {
+			if (y > lowestY
+					&& y < lowestY + TEXT_HEIGHT
+					&& x > BUTTON_X
+					&& x < BUTTON_X + TEXT_WIDTH) {
+				index = i;
+				break;
+			}
+			lowestY += 100;
+		}
+	}
+	if (index >= 0 && currentResolutionIndex != index) {
+		resMask = getResMask(index);
+		currentResolutionIndex = index;
+	}
+	else {
+		resMask = 0;
+	}
+}
+
+void createMenu(cv::Mat &menuImage){
+	int yOffset = FIRST_BUTTON_Y;
+	int xOffset = BUTTON_X;
+	for (auto res : CAMERA_RESOLUTIONS) {
+		cv::rectangle(menuImage,
+			cv::Point(xOffset - 10, yOffset - TEXT_HEIGHT),
+			cv::Point(xOffset + TEXT_WIDTH, yOffset + 10),
+			cv::Scalar(255, 0, 0), 4);
+		cv::putText(menuImage,
+			std::to_string(res.w) + " X " + std::to_string(res.h),
+			cv::Point(xOffset, yOffset),cv::FONT_HERSHEY_DUPLEX,
+			1, cv::Scalar(0,255,0), 2, false);
+		yOffset += 100;
+	}
 }
 
 int main(int argc, char *argv[])
@@ -38,17 +83,25 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	log_info("Sucessfully conected with server");
-	//receive first header of mat object 
-	char *entete ;
-	read_size = recv(hSocket, entete, sizeof(cv::Mat),0);
-	cv::Mat* head = reinterpret_cast<cv::Mat*>(entete); 
 
-	log_info("Start message sending");
+	cv::Mat menu(MENU_W, MENU_H, CV_64FC4);
+	createMenu(menu);
+	cv::imshow(MENU_WINDOW_NAME, menu);
+	cv::setMouseCallback(MENU_WINDOW_NAME, mouseCallBack, NULL);
 
-	int imgSize = head->rows * head->cols * CV_ELEM_SIZE(head->flags);
-	uchar* sockData = new uchar[imgSize];
-	log_info("Start message sending1");
 	while(1) {
+		//receive first header of mat object 
+		char *entete ;
+		read_size = recv(hSocket, entete, sizeof(cv::Mat),0);
+		cv::Mat* head = reinterpret_cast<cv::Mat*>(entete); 
+
+		log_info("Start message sending");
+
+		int imgSize = head->rows * head->cols * CV_ELEM_SIZE(head->flags);
+		uchar* sockData = new uchar[imgSize];
+		log_info("Start message sending1");
+
+
 		int bytes = 0;
 		// receive first frame and additionnal frame
 		for (int i = 0; i < imgSize; i += bytes) {
@@ -70,13 +123,14 @@ int main(int argc, char *argv[])
 			return 0;
 		}else{
 			log_info("send OK");
-			message = ELE4205_OK; 
+			message = ELE4205_OK | resMask;
+			//std::cout << "envoi: " << (int)resMask << std::endl; 
 			send(hSocket, message_data, sizeof(uint32_t), 0);
 			log_info("send OK1");
 		}
+		delete sockData;
 	}
 	log_info("Close everything");
-	delete sockData ; 
 	close(hSocket);
 	return 0;
 }

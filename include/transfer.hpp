@@ -19,6 +19,8 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/opencv.hpp>
 
+#include "capture.hpp"
+
 #define PORT_NUMBER 4099
 #define SERVER_ADDRESS "192.168.7.2"
 #define ELE4205_OK    0b00000001
@@ -44,6 +46,47 @@
 #else
 #define log_info(x)
 #endif
+
+/**
+ * Résolutions supportées.
+ */
+const Resolution CAMERA_RESOLUTIONS[] = {
+	{160, 120},
+	{320, 240},
+	{800, 600},
+	{1280, 960}
+};
+
+/**
+ * Obtenir le masque de bits pour les résolutions à partir d'un indice.
+ *
+ * \param index Indice de 0 à 3
+ * \return Masque de bits
+ */
+uint32_t getResMask(uint32_t index){
+	uint32_t mask = ELE4205_RES01;
+	std::cout << "& " << index << "    " << (int)mask << std::endl;
+	mask = mask << index;
+	std::cout << "& " << (int)mask << std::endl;
+	return mask;
+}
+
+/**
+ * Obtenir l'indice d'une résolution à partir d'un masque de bits.
+ *
+ * \param mask Masque de bits
+ * \return Indice de 0 à 3
+ */
+uint32_t getResIndex(uint32_t mask){
+	std::cout << "$ " << (int)mask << std::endl;
+	for (uint32_t i = 0; i < 4; i++){
+		if ((mask & (ELE4205_RES01 << i)) != 0){
+			std::cout << "^ " << i << std::endl;
+			return i;
+		}
+	}
+	return -1;
+}
 
 // Signatures des fonctions client.
 /**

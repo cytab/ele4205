@@ -3,6 +3,9 @@
 
 #include "transfer.hpp"
 
+char resMaks = 0;
+char resIndex = INITIAL_RES_INDEX;
+
 int sendEntete(cv::Mat frame,int sock){	
 	int bytes ;
 	cv::Mat* enteteframe = new cv::Mat(frame) ; 
@@ -18,6 +21,7 @@ int sendEntete(cv::Mat frame,int sock){
 
 int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int flag){
 	capture >> frame;
+	std::cout << "(" << frame.rows << "; " << frame.cols << ")" << std::endl;
 	int imageSize = frame.total()*frame.elemSize();
 	// Send some data
 	if (flag == 0){
@@ -52,14 +56,6 @@ int BindCreatedSocket(int hSocket, int p)
 
 int main(int argc, char *argv[])
 {
-	// Déterminer la résolution (par défaut ou spécifiée)
-	int resW = -1;
-	int resH = -1;
-	if (argc == 3){
-		resW = std::stoi(std::string(argv[1]));
-		resH = std::stoi(std::string(argv[2]));;
-	}
-
 	int socket_desc, sock, clientLen ; 
 	struct sockaddr_in server, client;
 
@@ -79,10 +75,6 @@ int main(int argc, char *argv[])
 	}
 
 	cv::VideoCapture capture(0);
-	if (resW > 0 && resH > 0){
-		capture.set(CV_CAP_PROP_FRAME_WIDTH, resW);
-		capture.set(CV_CAP_PROP_FRAME_HEIGHT, resH);
-	}
 	if(!capture.isOpened()){
 		log_info("Failed to  connect to the camera");
 	}
@@ -109,6 +101,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	capture.set(CV_CAP_PROP_FRAME_WIDTH,
+		CAMERA_RESOLUTIONS[INITIAL_RES_INDEX].w);
+	capture.set(CV_CAP_PROP_FRAME_HEIGHT,
+		CAMERA_RESOLUTIONS[INITIAL_RES_INDEX].h);
+
 	for (;;) {
 		log_info("communication");
 		// Receive a reply from the client
@@ -120,10 +117,20 @@ int main(int argc, char *argv[])
 				log_info("reception error");	
 			}
 		};
+		// MASK
+		uint32_t newIndex = getResIndex(client_message);
+		if (newIndex < 4 && newIndex != resIndex){
+			resIndex = newIndex;
+			capture.set(CV_CAP_PROP_FRAME_WIDTH,
+				CAMERA_RESOLUTIONS[resIndex].w);
+			capture.set(CV_CAP_PROP_FRAME_HEIGHT,
+				CAMERA_RESOLUTIONS[resIndex].h);
+		}
+		
 		log_info("communication1");
-		if(ELE4205_OK == client_message) {
+		if((ELE4205_OK & client_message) == ELE4205_OK) {
 			log_info("ok recu");
-			int result = sendImage(capture, frame, sock, 1);
+			int result = sendImage(capture, frame, sock, 0);
 			log_info(std::string("Resultat : ")
 				+ std::to_string(result)
 				+ std::string("\n"));
@@ -132,7 +139,7 @@ int main(int argc, char *argv[])
 				return -1;
 			}
 		}
-		else if (ELE4205_QUIT == client_message) {
+		else if ((ELE4205_QUIT & client_message) == ELE4205_QUIT) {
 			close(sock);
 			return 0;
 		}
