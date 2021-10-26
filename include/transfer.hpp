@@ -22,8 +22,10 @@
 #define PORT_NUMBER 4099
 #define ELE4205_OK 0b1
 #define ELE4205_QUIT 0b10
-#define ESC 27
 #define SERVER_ADDRESS "192.168.7.2"
+
+#define ESC 27
+#define WINDOW_NAME "Transfert d'images"
 
 // Signatures des fonctions client.
 /**
