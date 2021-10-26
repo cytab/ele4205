@@ -57,3 +57,10 @@ commande `scp root@192.168.7.2:/home/root`.
 Pour l'application client (client.cpp), on compile en natif directement sur
 Centos.
 
+### Livrable 3
+
+26 octobre : fin de livrable 3
+
+Le livrable 3 utilise une interface graphique.Cliquez sur les boutons de la
+fenêtre du client pour changer la résolution.
+

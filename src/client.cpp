@@ -25,8 +25,8 @@ void mouseCallBack(int event, int x, int y, int flags, void* userdata)
 	int index = -1;
 	if  (event == cv::EVENT_LBUTTONDOWN ) {
 		for (int i = 0; i < sizeof(CAMERA_RESOLUTIONS); i++) {
-			if (y > lowestY
-					&& y < lowestY + TEXT_HEIGHT
+			if (y > (lowestY - 10)
+					&& y < (lowestY + TEXT_HEIGHT + 10)
 					&& x > BUTTON_X
 					&& x < BUTTON_X + TEXT_WIDTH) {
 				index = i;
