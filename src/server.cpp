@@ -28,12 +28,14 @@ int sendEntete(cv::Mat frame,int sock){
             std::cout << "Error while sending..";
 	    return -1;
     }
+    delete enteteframe ;
     return 0;    
 }
  
 
 int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int bytes, int flag){
     capture >> frame;
+    //std::cout << "Error while sending..";
     int imageSize = frame.total()*frame.elemSize();
     // Send some data
     if (flag == 0){
@@ -42,12 +44,14 @@ int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int bytes, int f
      }	
     
     // send datarecv
+    std::cout <<"frame process\n" << std::endl;
     if(!frame.empty()){
-        if((bytes = send(sock,frame.data,imageSize,0))<0){
+        if((bytes = write(sock,frame.data,imageSize))<0){
             std::cout << "Error while sending..";
 	    return -1;
         }
    }
+   std::cout <<"frame process2\n" << std::endl;
    return 0;
 	
 }
@@ -102,9 +106,7 @@ int main(int argc, char *argv[])
         perror("bind failed.");
         return 1;
     }
-    
-
-    char* client_m = (char*)&client_message; 
+     
     cv::VideoCapture capture(0);
 	//capture.set(CV_CAP_PROP_FRAME_WIDTH, res.w);
 	//capture.set(CV_CAP_PROP_FRAME_HEIGHT, res.h);
@@ -115,6 +117,7 @@ int main(int argc, char *argv[])
     cv::Mat frame;
 
     int bytes = 0;
+    printf("Capture video\n");
     capture.set(CV_CAP_PROP_FORMAT,CV_8UC3);
     //Accept and incoming connection
     int onetime = 0;
@@ -122,40 +125,40 @@ int main(int argc, char *argv[])
 
     for (;;)
     {
-        //make img continuos
-        if ( ! frame.isContinuous() ) { 
-            frame = frame.clone();
-        }
-
         clientLen = sizeof(struct sockaddr_in);
         //accept connection from an incoming client
-
+        std::cout <<"about to acccept\n" << std::endl;
         sock = accept(socket_desc,(struct sockaddr *)&client,(socklen_t*)&clientLen);
         if (sock < 0)
         {
             perror("accept failed");
             return 1;
         }else{ 
- 	
+ 	    std::cout <<"accept connection\n" << std::endl;
             if(sendImage(capture, frame, sock, bytes, 0) == -1 && onetime != 0){
                 close(sock);
                 return -1;
             }
             onetime = 1 ;
         }
-
+        std::cout <<"communication\n" << std::endl;
         //Receive a reply from the client
-        if( ssize_t numBytesRcvd = recv(sock, client_m, sizeof(uint32_t), 0) < 0)
-        {
-            printf("recv failed");
-            break;
-        }
-
+	int numBytesRcvd = 0;
+        // receive first frame and additionnal frame
+	for (int i = 0; i < sizeof(uint32_t); i += numBytesRcvd) {
+    		if ((numBytesRcvd = recv(sock, &client_message, sizeof(uint32_t), 0)) == -1){
+			printf("reception error\n");	
+		}
+       			
+	};
+        std::cout <<"communication1\n" << std::endl;
         if(ELE4205_OK == client_message)
         {
+            std::cout <<"ok recu\n" << std::endl;
             if(sendImage(capture, frame, sock, bytes, 1) == -1){
                 close(sock);
                 return -1;
+		std::cout <<"bizarre\n" << std::endl;
             }
         }
         else if(ELE4205_QUIT == client_message)
@@ -163,7 +166,6 @@ int main(int argc, char *argv[])
             close(sock);
             return 0;
         }
-
         close(sock);
         sleep(30);
     }

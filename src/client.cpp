@@ -99,16 +99,18 @@ int main(int argc, char *argv[])
         if(key == ESC){
 	    printf("escape\n");
             message = ELE4205_QUIT; 
-            send(hSocket, message_data, sizeof(message), 0);
+            send(hSocket, message_data, sizeof(uint32_t), 0);
             close(hSocket);
             return 0;
         }else{
             printf("send OK\n");
             message = ELE4205_OK; 
-            send(hSocket, message_data, sizeof(message), 0);
+            send(hSocket, message_data, sizeof(uint32_t), 0);
+	    printf("send OK1\n");
         }
     }
 	printf("Close everything\n");
+    delete sockData ; 
     close(hSocket);
     return 0;
 }
