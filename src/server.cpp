@@ -21,7 +21,6 @@ int sendEntete(cv::Mat frame,int sock){
 
 int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int flag){
 	capture >> frame;
-	std::cout << "(" << frame.rows << "; " << frame.cols << ")" << std::endl;
 	int imageSize = frame.total()*frame.elemSize();
 	// Send some data
 	if (flag == 0){

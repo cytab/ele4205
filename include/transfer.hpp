@@ -65,9 +65,7 @@ const Resolution CAMERA_RESOLUTIONS[] = {
  */
 uint32_t getResMask(uint32_t index){
 	uint32_t mask = ELE4205_RES01;
-	std::cout << "& " << index << "    " << (int)mask << std::endl;
 	mask = mask << index;
-	std::cout << "& " << (int)mask << std::endl;
 	return mask;
 }
 
@@ -78,10 +76,8 @@ uint32_t getResMask(uint32_t index){
  * \return Indice de 0 à 3
  */
 uint32_t getResIndex(uint32_t mask){
-	std::cout << "$ " << (int)mask << std::endl;
 	for (uint32_t i = 0; i < 4; i++){
 		if ((mask & (ELE4205_RES01 << i)) != 0){
-			std::cout << "^ " << i << std::endl;
 			return i;
 		}
 	}
@@ -135,4 +131,21 @@ int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int flag);
  * \return Code d'erreur (0 pour succès).
  */
 int BindCreatedSocket(int hSocket, int p);
+
+// Fonctions de l'interface graphique.
+/**
+ * Réagir aux évènements de la souris.
+ * \param event Identifiant de l'évènement.
+ * \param x Position du curseur (vertical).
+ * \param y Position du curseur (horizontal).
+ * \param flags Fanions de configuration.
+ * \param userdata Pointeur vers une zone mémoire (inutilisée).
+ */
+void mouseCallBack(int event, int x, int y, int flags, void* userdata);
+
+/**
+ * Initialiser la fenêtre de l'interface graphique.
+ * \param menuImage Référence vers une matrice à afficher.
+ */
+void initializeMenu(cv::Mat &menuImage);
 

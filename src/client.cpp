@@ -32,7 +32,7 @@ void mouseCallBack(int event, int x, int y, int flags, void* userdata)
 				index = i;
 				break;
 			}
-			lowestY += 100;
+			lowestY += FIRST_BUTTON_Y;
 		}
 	}
 	if (index >= 0 && currentResolutionIndex != index) {
@@ -44,7 +44,12 @@ void mouseCallBack(int event, int x, int y, int flags, void* userdata)
 	}
 }
 
-void createMenu(cv::Mat &menuImage){
+void initializeMenu(cv::Mat &menuImage)
+{
+	cv::putText(menuImage,
+		"Cliquez sur un format.",
+		cv::Point(10, 40),cv::FONT_HERSHEY_DUPLEX,
+		1, cv::Scalar(0,0,255), 2, false);
 	int yOffset = FIRST_BUTTON_Y;
 	int xOffset = BUTTON_X;
 	for (auto res : CAMERA_RESOLUTIONS) {
@@ -56,7 +61,7 @@ void createMenu(cv::Mat &menuImage){
 			std::to_string(res.w) + " X " + std::to_string(res.h),
 			cv::Point(xOffset, yOffset),cv::FONT_HERSHEY_DUPLEX,
 			1, cv::Scalar(0,255,0), 2, false);
-		yOffset += 100;
+		yOffset += FIRST_BUTTON_Y;
 	}
 }
 
@@ -85,7 +90,7 @@ int main(int argc, char *argv[])
 	log_info("Sucessfully conected with server");
 
 	cv::Mat menu(MENU_W, MENU_H, CV_64FC4);
-	createMenu(menu);
+	initializeMenu(menu);
 	cv::imshow(MENU_WINDOW_NAME, menu);
 	cv::setMouseCallback(MENU_WINDOW_NAME, mouseCallBack, NULL);
 
