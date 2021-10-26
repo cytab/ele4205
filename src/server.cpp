@@ -10,7 +10,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+
 #include <unistd.h>
+#include <chrono>
+#include <thread>
+
 #include <sys/types.h>
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/opencv.hpp>
@@ -123,8 +127,7 @@ int main(int argc, char *argv[])
     int onetime = 0;
     listen(socket_desc, 5);
 
-    for (;;)
-    {
+	std::cout << "Loop start." << std::endl;
         clientLen = sizeof(struct sockaddr_in);
         //accept connection from an incoming client
         std::cout <<"about to acccept\n" << std::endl;
@@ -133,14 +136,18 @@ int main(int argc, char *argv[])
         {
             perror("accept failed");
             return 1;
-        }else{ 
+        }else if (onetime == 0) { 
  	    std::cout <<"accept connection\n" << std::endl;
-            if(sendImage(capture, frame, sock, bytes, 0) == -1 && onetime != 0){
+            if(sendImage(capture, frame, sock, bytes, 0) == -1){
                 close(sock);
                 return -1;
             }
             onetime = 1 ;
         }
+
+    for (;;)
+    {
+	
         std::cout <<"communication\n" << std::endl;
         //Receive a reply from the client
 	int numBytesRcvd = 0;
@@ -155,7 +162,9 @@ int main(int argc, char *argv[])
         if(ELE4205_OK == client_message)
         {
             std::cout <<"ok recu\n" << std::endl;
-            if(sendImage(capture, frame, sock, bytes, 1) == -1){
+		int result = sendImage(capture, frame, sock, bytes, 1);
+		std::cout << "Resultat : " << result << std::endl;
+            if(result == -1){
                 close(sock);
                 return -1;
 		std::cout <<"bizarre\n" << std::endl;
@@ -166,8 +175,10 @@ int main(int argc, char *argv[])
             close(sock);
             return 0;
         }
-        close(sock);
-        sleep(30);
+	std::cout << "Loop end." << std::endl;
+        //close(sock);
+	//sleep(30);
+	std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
     return 0;
 }
