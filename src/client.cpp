@@ -1,33 +1,12 @@
 /**
  * 
- * Inspired by :
+ * Inspiré par
  * https://aticleworld.com/socket-programming-in-c-using-tcpip/
- * auhtor :
  * 
  * **/
 
-//#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<sys/socket.h>
-#include<arpa/inet.h>
-#include<unistd.h>
-#include "opencv2/highgui/highgui.hpp"
-#include <opencv2/opencv.hpp>
+#include "transfer.hpp"
 
-#define PORT_NUMBER 4099
-#define ELE4205_OK 0b1
-#define ELE4205_QUIT 0b10
-#define ESC 27
-
-//Create a Socket for server communication
-short SocketCreate(void)
-{
-    short hSocket;
-    printf("Create the socket\n");
-    hSocket = socket(AF_INET, SOCK_STREAM, 0);
-    return hSocket;
-}
 //try to connect with server
 int SocketConnect(int hSocket)
 {

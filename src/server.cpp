@@ -1,28 +1,11 @@
 /**
  * 
- * Inspired by :
+ * Inspiré par :
  * https://aticleworld.com/socket-programming-in-c-using-tcpip/
- * auhtor :
  * 
  * **/
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 
-#include <unistd.h>
-#include <chrono>
-#include <thread>
-
-#include <sys/types.h>
-#include "opencv2/highgui/highgui.hpp"
-#include <opencv2/opencv.hpp>
-
-#define PORT_NUMBER 4099
-#define ELE4205_OK 0b1
-#define ELE4205_QUIT 0b10
-
+#include "transfer.hpp"
 
 int sendEntete(cv::Mat frame,int sock){	
     int bytes ;
@@ -58,15 +41,6 @@ int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int bytes, int f
    std::cout <<"frame process2\n" << std::endl;
    return 0;
 	
-}
-
-
-short SocketCreate(void)
-{
-    int hSocket;
-    printf("Create the socket\n");
-    hSocket = socket(AF_INET, SOCK_STREAM, 0);
-    return hSocket;
 }
 
 
