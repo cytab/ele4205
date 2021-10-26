@@ -42,4 +42,18 @@ référez-vous à la page du projet en question :
 
 ## Progrès
 
+### Livrable 1
+
 19 octobre : fin du livrable 1.
+
+### Livrable 2
+
+26 octobre : fin du livrable 2
+
+Pour le serveur (server.cpp), on utilise la compilation croisée avec le SDK du
+projet. Le fichier exécutable est ensuite transmis sur la Odroid à l'aide de la
+commande `scp root@192.168.7.2:/home/root`.
+
+Pour l'application client (client.cpp), on compile en natif directement sur
+Centos.
+

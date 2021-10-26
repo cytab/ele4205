@@ -10,7 +10,8 @@ int SocketConnect(int hSocket)
 	remote.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
 	remote.sin_family = AF_INET;
 	remote.sin_port = htons(PORT_NUMBER);
-	iRetval = connect(hSocket,(struct sockaddr *)&remote,sizeof(struct sockaddr_in));
+	iRetval = connect(hSocket,(struct sockaddr *)&remote,
+		sizeof(struct sockaddr_in));
 	return iRetval;
 }
 
@@ -42,25 +43,23 @@ int main(int argc, char *argv[])
 	read_size = recv(hSocket, entete, sizeof(cv::Mat),0);
 	cv::Mat* head = reinterpret_cast<cv::Mat*>(entete); 
 
-	log_info("Start messgae sending");
+	log_info("Start message sending");
 
-	//std::cout << head->rows << head->cols << std::endl; // TODO
 	int imgSize = head->rows * head->cols * CV_ELEM_SIZE(head->flags);
 	uchar* sockData = new uchar[imgSize];
-	//std::cout << std::hex << &sockData[0] << std::endl; // TODO
-	log_info("Start messgae sending1");
+	log_info("Start message sending1");
 	while(1) {
 		int bytes = 0;
 		// receive first frame and additionnal frame
 		for (int i = 0; i < imgSize; i += bytes) {
-			if ((bytes = recv(hSocket, sockData+i, imgSize-i, 0)) == -1){ // TODO
+			bytes = recv(hSocket, sockData+i, imgSize-i, 0);
+			if (bytes == -1){
 				log_info("reception error");	
 			}
 		};
 		cv::Mat frame(head->rows,head->cols, head->type(), sockData);
-		cv::namedWindow(WINDOW_NAME); // Create a window
 		log_info("afficher image");
-		cv::imshow("FRAME", frame);
+		cv::imshow(FRAME_WINDOW_NAME, frame);
 		log_info("afficher image1");
 		int key = cv::waitKey(30)&0xFF;
 		if(key == ESC){

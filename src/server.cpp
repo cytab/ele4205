@@ -16,18 +16,17 @@ int sendEntete(cv::Mat frame,int sock){
 }
  
 
-int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int bytes, int flag){ // TODO
+int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int flag){
 	capture >> frame;
 	int imageSize = frame.total()*frame.elemSize();
 	// Send some data
 	if (flag == 0){
 		sendEntete(frame, sock);
 	}
-
 	// send datarecv
 	log_info("frame process");
 	if(!frame.empty()){
-		if((bytes = write(sock,frame.data,imageSize))<0){
+		if(write(sock,frame.data,imageSize) < 0){
 			log_info("Error while sending..");
 			return -1;
 		}
@@ -41,7 +40,7 @@ int BindCreatedSocket(int hSocket, int p)
 	int iRetval=-1;
 	int ClientPort = p;
 	struct sockaddr_in  remote;
-	memset(&remote, 0, sizeof(remote));       // Zero out structure
+	memset(&remote, 0, sizeof(remote)); // Zero out structure
 	/* Internet address family */
 	remote.sin_family = AF_INET;
 	/* Any incoming interface */
@@ -65,7 +64,6 @@ int main(int argc, char *argv[])
 	struct sockaddr_in server, client;
 
 	uint32_t client_message = 0;
-	// char test -> apres image
 
 	// Create socket
 	socket_desc = SocketCreate();
@@ -82,7 +80,7 @@ int main(int argc, char *argv[])
 
 	cv::VideoCapture capture(0);
 	if (resW > 0 && resH > 0){
-		capture.set(CV_CAP_PROP_FRAME_WIDTH, resW); // TODO
+		capture.set(CV_CAP_PROP_FRAME_WIDTH, resW);
 		capture.set(CV_CAP_PROP_FRAME_HEIGHT, resH);
 	}
 	if(!capture.isOpened()){
@@ -98,13 +96,14 @@ int main(int argc, char *argv[])
 	clientLen = sizeof(struct sockaddr_in);
 	//accept connection from an incoming client
 	log_info("about to acccept");
-	sock = accept(socket_desc,(struct sockaddr *)&client,(socklen_t*)&clientLen);
+	sock = accept(socket_desc,(struct sockaddr *)&client,
+		(socklen_t*)&clientLen);
 	if (sock < 0){
 		perror("accept failed");
 		return 1;
 	} else { 
 		log_info("accept connection");
-		if(sendImage(capture, frame, sock, bytes, 0) == -1){
+		if(sendImage(capture, frame, sock, 0) == -1){
 			close(sock);
 			return -1;
 		}
@@ -116,14 +115,15 @@ int main(int argc, char *argv[])
 		int numBytesRcvd = 0;
 		// receive first frame and additionnal frame
 		for (int i = 0; i < sizeof(uint32_t); i += numBytesRcvd) {
-			if ((numBytesRcvd = recv(sock, &client_message, sizeof(uint32_t), 0)) == -1) {
+			if ((numBytesRcvd = recv(sock, &client_message,
+					sizeof(uint32_t), 0)) == -1) {
 				log_info("reception error");	
 			}
 		};
 		log_info("communication1");
 		if(ELE4205_OK == client_message) {
 			log_info("ok recu");
-			int result = sendImage(capture, frame, sock, bytes, 1);
+			int result = sendImage(capture, frame, sock, 1);
 			log_info(std::string("Resultat : ")
 				+ std::to_string(result)
 				+ std::string("\n"));

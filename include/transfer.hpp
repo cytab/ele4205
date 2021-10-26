@@ -20,17 +20,29 @@
 #include <opencv2/opencv.hpp>
 
 #define PORT_NUMBER 4099
-#define ELE4205_OK 0b1
-#define ELE4205_QUIT 0b10
 #define SERVER_ADDRESS "192.168.7.2"
+#define ELE4205_OK    0b00000001
+#define ELE4205_QUIT  0b00000010
+#define ELE4205_RES01 0b00000100
+#define ELE4205_RES02 0b00001000
+#define ELE4205_RES03 0b00010000
+#define ELE4205_RES04 0b00100000
+#define INITIAL_RES_INDEX 2
 
 #define ESC 27
-#define WINDOW_NAME "Transfert d'images"
+#define FRAME_WINDOW_NAME "Capture vidéo"
+#define MENU_WINDOW_NAME "Sélectionner la résolution"
+#define MENU_W 500
+#define MENU_H 500
+#define TEXT_HEIGHT 32
+#define TEXT_WIDTH 200
+#define FIRST_BUTTON_Y 100
+#define BUTTON_X 100
 
 #ifdef Debug
 #define log_info(x)	std::cout << x << std::endl;
 #else
-#define log_info(x) 
+#define log_info(x)
 #endif
 
 // Signatures des fonctions client.
@@ -70,8 +82,7 @@ int sendEntete(cv::Mat frame, int sock);
  * \param flag Fanions de configuration de la fonction.
  * \return Code d'erreur (0 pour succès).
  */
-int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int bytes,
-	int flag);
+int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int flag);
 
 /**
  * Lier le socket serveur au socket client.
