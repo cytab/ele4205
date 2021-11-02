@@ -31,6 +31,10 @@
 #define ELE4205_RES04 0b00100000
 #define INITIAL_RES_INDEX 2
 
+#define STATE_READY 0b00000001
+#define STATE_IDOWN 0b00000010
+#define STATE_PUSHB 0b00000100
+
 #define ESC 27
 #define FRAME_WINDOW_NAME "Capture vidéo"
 #define MENU_WINDOW_NAME "Sélectionner la résolution"
@@ -40,6 +44,15 @@
 #define TEXT_WIDTH 200
 #define FIRST_BUTTON_Y 100
 #define BUTTON_X 100
+
+#define GPIO_ID "228"
+#define GPIO_DIR "in"
+#define ADC_FILENAME "/sys/class/saradc/ch0"
+#define READ_FILE_MODE "r"
+#define WRITE_FILE_MODE "w"
+#define GPIO_FILENAME "/sys/class/gpio/gpio228/value"
+#define EXPORT_FILE "/sys/class/gpio/export"
+#define GPIO_DIR_DIRECTORY "/sys/class/gpio/gpio228/direction"
 
 #ifdef Debug
 #define log_info(x)	std::cout << x << std::endl;
@@ -149,3 +162,20 @@ void mouseCallBack(int event, int x, int y, int flags, void* userdata);
  */
 void initializeMenu(cv::Mat &menuImage);
 
+/**
+ * Lis la valeur du adc du répertoire /sys/class/saradc
+ * \return Valeur entre 0 et 1023 (plus lumineurx -> moins lumineux)
+ */
+int readAdc() ; 
+
+/**
+ * Lis la valeur du adc du répertoire /sys/class/gpio/gpio228/value 
+ * (value est un fichier et non un programme)
+ * \return Valeur entre 0 et 1 
+ */
+int readButton() ; 
+
+/**
+ * Configurer le GPIO 
+ */
+void setEnvGpio() ; 

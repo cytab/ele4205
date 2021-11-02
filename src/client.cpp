@@ -73,6 +73,8 @@ int main(int argc, char *argv[])
 	uint32_t message;
 	char* message_data = (char*)&message;
 
+	uint32_t server_message = 0;
+
 	//Create socket
 	hSocket = SocketCreate();
 
@@ -88,53 +90,70 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	log_info("Sucessfully conected with server");
-
+	
 	cv::Mat menu(MENU_W, MENU_H, CV_64FC4);
 	initializeMenu(menu);
 	cv::imshow(MENU_WINDOW_NAME, menu);
 	cv::setMouseCallback(MENU_WINDOW_NAME, mouseCallBack, NULL);
 
 	while(1) {
-		//receive first header of mat object 
-		char *entete ;
-		read_size = recv(hSocket, entete, sizeof(cv::Mat),0);
-		cv::Mat* head = reinterpret_cast<cv::Mat*>(entete); 
-
-		log_info("Start message sending");
-
-		int imgSize = head->rows * head->cols * CV_ELEM_SIZE(head->flags);
-		uchar* sockData = new uchar[imgSize];
-		log_info("Start message sending1");
-
-
-		int bytes = 0;
+	    int numBytesRcvd = 0;
 		// receive first frame and additionnal frame
-		for (int i = 0; i < imgSize; i += bytes) {
-			bytes = recv(hSocket, sockData+i, imgSize-i, 0);
-			if (bytes == -1){
+		for (int i = 0; i < sizeof(uint32_t); i += numBytesRcvd) {
+			if ((numBytesRcvd = recv(hSocket, &server_message,
+					sizeof(uint32_t), 0)) == -1) {
 				log_info("reception error");	
 			}
 		};
-		cv::Mat frame(head->rows,head->cols, head->type(), sockData);
-		log_info("afficher image");
-		cv::imshow(FRAME_WINDOW_NAME, frame);
-		log_info("afficher image1");
-		int key = cv::waitKey(30)&0xFF;
-		if(key == ESC){
-			log_info("escape");
-			message = ELE4205_QUIT; 
-			send(hSocket, message_data, sizeof(uint32_t), 0);
-			close(hSocket);
-			return 0;
-		}else{
-			log_info("send OK");
-			message = ELE4205_OK | resMask;
-			//std::cout << "envoi: " << (int)resMask << std::endl; 
-			send(hSocket, message_data, sizeof(uint32_t), 0);
-			log_info("send OK1");
+		if(server_message == STATE_READY){
+				//receive first header of mat object 
+			char *entete ;
+			read_size = recv(hSocket, entete, sizeof(cv::Mat),0);
+			cv::Mat* head = reinterpret_cast<cv::Mat*>(entete); 
+
+			log_info("Start message sending");
+
+			int imgSize = head->rows * head->cols * CV_ELEM_SIZE(head->flags);
+			uchar* sockData = new uchar[imgSize];
+			log_info("Start message sending1");
+
+
+			int bytes = 0;
+			// receive first frame and additionnal frame
+			for (int i = 0; i < imgSize; i += bytes) {
+				bytes = recv(hSocket, sockData+i, imgSize-i, 0);
+				if (bytes == -1){
+					log_info("reception error");	
+				}
+			};
+			cv::Mat frame(head->rows,head->cols, head->type(), sockData);
+			log_info("afficher image");
+			cv::imshow(FRAME_WINDOW_NAME, frame);
+			log_info("afficher image1");
+			int key = cv::waitKey(30)&0xFF;
+			if(key == ESC){
+				log_info("escape");
+				message = ELE4205_QUIT; 
+				send(hSocket, message_data, sizeof(uint32_t), 0);
+				close(hSocket);
+				return 0;
+			}else{
+				log_info("send OK");
+				message = ELE4205_OK | resMask;
+				//std::cout << "envoi: " << (int)resMask << std::endl; 
+				send(hSocket, message_data, sizeof(uint32_t), 0);
+				log_info("send OK1");
+			}
+			delete sockData;
+		}else if(server_message == STATE_IDOWN){
+			message = 0; 
+		 	send(hSocket, message_data, sizeof(uint32_t), 0);
+		}else if(server_message == STATE_PUSHB){
+			message = 0; 
+		 	send(hSocket, message_data, sizeof(uint32_t), 0);
 		}
-		delete sockData;
 	}
+		
 	log_info("Close everything");
 	close(hSocket);
 	return 0;

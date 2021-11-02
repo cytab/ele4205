@@ -6,6 +6,38 @@
 char resMaks = 0;
 char resIndex = INITIAL_RES_INDEX;
 
+int readAdc(){
+	char buffer[4] = {0};
+	FILE * f = fopen(ADC_FILENAME, READ_FILE_MODE);
+	
+	fread(buffer, 1, 4, f );
+	std::string a (buffer) ;
+	fclose(f);
+	return std::stoi(a) ; 
+}
+
+int readButton(){
+	char buffer[1] = {0};
+	FILE * f = fopen(GPIO_FILENAME, READ_FILE_MODE);
+	
+	fread(buffer, 1, 1, f );
+	std::string a (buffer) ;
+	fclose(f);
+	return std::stoi(a) ; 
+}
+
+void setEnvGpio(){
+
+	FILE * f = fopen(EXPORT_FILE, WRITE_FILE_MODE);
+	fwrite(GPIO_ID, 1, sizeof(GPIO_ID), f);
+	fclose(f);
+
+	FILE * f = fopen(GPIO_DIR_DIRECTORY, WRITE_FILE_MODE);
+    fwrite(GPIO_DIR, 1, sizeof(GPIO_DIR), f);
+	fclose(f);  
+}
+
+
 int sendEntete(cv::Mat frame,int sock){	
 	int bytes ;
 	cv::Mat* enteteframe = new cv::Mat(frame) ; 
@@ -55,6 +87,10 @@ int BindCreatedSocket(int hSocket, int p)
 
 int main(int argc, char *argv[])
 {
+	setEnvGpio();
+	uint32_t message;
+	char* message_serveur = (char*)&message;
+
 	int socket_desc, sock, clientLen ; 
 	struct sockaddr_in server, client;
 
@@ -94,10 +130,10 @@ int main(int argc, char *argv[])
 		return 1;
 	} else { 
 		log_info("accept connection");
-		if(sendImage(capture, frame, sock, 0) == -1){
-			close(sock);
-			return -1;
-		}
+		//if(sendImage(capture, frame, sock, 0) == -1){
+		//	close(sock);
+		//	return -1;
+		//}
 	}
 
 	capture.set(CV_CAP_PROP_FRAME_WIDTH,
@@ -106,6 +142,17 @@ int main(int argc, char *argv[])
 		CAMERA_RESOLUTIONS[INITIAL_RES_INDEX].h);
 
 	for (;;) {
+		
+		if(readAdc() < 1000){
+			if(readButton() == 1){
+				message = STATE_READY;
+			}else{
+				message = STATE_PUSHB;
+			}
+		}else{
+			message = STATE_IDOWN;
+		}
+		write(sock,message_serveur,sizeof(uint32_t));
 		log_info("communication");
 		// Receive a reply from the client
 		int numBytesRcvd = 0;
