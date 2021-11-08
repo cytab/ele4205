@@ -10,7 +10,7 @@ int readAdc(){
 	char buffer[4] = {0};
 	FILE * f = fopen(ADC_FILENAME, READ_FILE_MODE);
 	
-	fread(buffer, 1, 4, f );
+	fread(buffer, 1, 4, f);
 	std::string a (buffer) ;
 	fclose(f);
 	return std::stoi(a) ; 
@@ -20,7 +20,7 @@ int readButton(){
 	char buffer[1] = {0};
 	FILE * f = fopen(GPIO_FILENAME, READ_FILE_MODE);
 	
-	fread(buffer, 1, 1, f );
+	fread(buffer, 1, 1, f);
 	std::string a (buffer) ;
 	fclose(f);
 	return std::stoi(a) ; 
@@ -32,8 +32,8 @@ void setEnvGpio(){
 	fwrite(GPIO_ID, 1, sizeof(GPIO_ID), f);
 	fclose(f);
 
-	FILE * f = fopen(GPIO_DIR_DIRECTORY, WRITE_FILE_MODE);
-    fwrite(GPIO_DIR, 1, sizeof(GPIO_DIR), f);
+	f = fopen(GPIO_DIR_DIRECTORY, WRITE_FILE_MODE);
+	fwrite(GPIO_DIR, 1, sizeof(GPIO_DIR), f);
 	fclose(f);  
 }
 
@@ -130,11 +130,8 @@ int main(int argc, char *argv[])
 		return 1;
 	} else { 
 		log_info("accept connection");
-		//if(sendImage(capture, frame, sock, 0) == -1){
-		//	close(sock);
-		//	return -1;
-		//}
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	capture.set(CV_CAP_PROP_FRAME_WIDTH,
 		CAMERA_RESOLUTIONS[INITIAL_RES_INDEX].w);
@@ -142,28 +139,22 @@ int main(int argc, char *argv[])
 		CAMERA_RESOLUTIONS[INITIAL_RES_INDEX].h);
 
 	for (;;) {
-		
+		// Message 1 (serveur -> client) : envoyer l'état.
 		if(readAdc() < 1000){
-			if(readButton() == 1){
+			if(readButton() == 0) {
 				message = STATE_READY;
-			}else{
+			} else {
 				message = STATE_PUSHB;
 			}
 		}else{
 			message = STATE_IDOWN;
 		}
-		write(sock,message_serveur,sizeof(uint32_t));
+		write(sock, message_serveur, sizeof(uint32_t));
 		log_info("communication");
-		// Receive a reply from the client
-		int numBytesRcvd = 0;
-		// receive first frame and additionnal frame
-		for (int i = 0; i < sizeof(uint32_t); i += numBytesRcvd) {
-			if ((numBytesRcvd = recv(sock, &client_message,
-					sizeof(uint32_t), 0)) == -1) {
-				log_info("reception error");	
-			}
-		};
-		// MASK
+		// Message 2 (client -> serveur) : recevoir la résolution.
+		if (recv(sock, &client_message, sizeof(uint32_t), 0) == -1) {
+			log_info("reception error");	
+		}
 		uint32_t newIndex = getResIndex(client_message);
 		if (newIndex < 4 && newIndex != resIndex){
 			resIndex = newIndex;
@@ -173,9 +164,12 @@ int main(int argc, char *argv[])
 				CAMERA_RESOLUTIONS[resIndex].h);
 		}
 		
-		log_info("communication1");
-		if((ELE4205_OK & client_message) == ELE4205_OK) {
+		std::string m = std::string("communication1 " + std::to_string(newIndex));
+		log_info(m);
+		if(((ELE4205_OK & client_message) == ELE4205_OK)
+				&& message != STATE_IDOWN) {
 			log_info("ok recu");
+			// Message 3 : Envoyer l'image.
 			int result = sendImage(capture, frame, sock, 0);
 			log_info(std::string("Resultat : ")
 				+ std::to_string(result)

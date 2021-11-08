@@ -21,14 +21,14 @@
 
 #include "capture.hpp"
 
-#define PORT_NUMBER 4099
-#define SERVER_ADDRESS "192.168.7.2"
-#define ELE4205_OK    0b00000001
-#define ELE4205_QUIT  0b00000010
-#define ELE4205_RES01 0b00000100
-#define ELE4205_RES02 0b00001000
-#define ELE4205_RES03 0b00010000
-#define ELE4205_RES04 0b00100000
+#define PORT_NUMBER	4099
+#define SERVER_ADDRESS	"192.168.7.2"
+#define ELE4205_OK	0b00000001
+#define ELE4205_QUIT	0b00000010
+#define ELE4205_RES01	0b00000100
+#define ELE4205_RES02	0b00001000
+#define ELE4205_RES03	0b00010000
+#define ELE4205_RES04	0b00100000
 #define INITIAL_RES_INDEX 2
 
 #define STATE_READY 0b00000001
@@ -40,10 +40,10 @@
 #define MENU_WINDOW_NAME "Sélectionner la résolution"
 #define MENU_W 500
 #define MENU_H 500
-#define TEXT_HEIGHT 32
-#define TEXT_WIDTH 200
-#define FIRST_BUTTON_Y 100
-#define BUTTON_X 100
+#define TEXT_HEIGHT	32
+#define TEXT_WIDTH	200
+#define FIRST_BUTTON_Y	100
+#define BUTTON_X	100
 
 #define GPIO_ID "228"
 #define GPIO_DIR "in"
@@ -59,6 +59,13 @@
 #else
 #define log_info(x)
 #endif
+
+/*
+Ordre des transfers :
+SERVEUR -> CLIENT  : State
+CLIENT  -> SERVEUR : Resolution
+SERVEUR -> CLIENT  : Image (optionnel)
+*/
 
 /**
  * Résolutions supportées.
