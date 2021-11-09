@@ -7,6 +7,8 @@
 int currentResolutionIndex = INITIAL_RES_INDEX;
 uint32_t resMask = 0;
 
+int imageID = 0;
+
 int SocketConnect(int hSocket)
 {
 	int iRetval=-1;
@@ -25,10 +27,10 @@ void mouseCallBack(int event, int x, int y, int flags, void* userdata)
 	int index = -1;
 	if  (event == cv::EVENT_LBUTTONDOWN ) {
 		for (int i = 0; i < sizeof(CAMERA_RESOLUTIONS); i++) {
-			if (y > (lowestY - 10)
-					&& y < (lowestY + TEXT_HEIGHT + 10)
-					&& x > BUTTON_X
-					&& x < BUTTON_X + TEXT_WIDTH) {
+			if (y > (lowestY - GUI_BUTTON_PADDING)
+			    && y < (lowestY + TEXT_HEIGHT + GUI_BUTTON_PADDING)
+			    && x > BUTTON_X
+			    && x < BUTTON_X + TEXT_WIDTH) {
 				index = i;
 				break;
 			}
@@ -96,10 +98,10 @@ int main(int argc, char *argv[])
 	cv::imshow(MENU_WINDOW_NAME, menu);
 	cv::setMouseCallback(MENU_WINDOW_NAME, mouseCallBack, NULL);
 
-	cv::Mat blankFrame(200, 400, CV_64FC4);
-	cv::Mat noImageFrame(200, 400, CV_64FC4);
+	cv::Mat blankFrame(BLANK_FRAME_H, BLANK_FRAME_W, CV_64FC4);
+	cv::Mat noImageFrame(BLANK_FRAME_H, BLANK_FRAME_W, CV_64FC4);
 	cv::putText(noImageFrame,
-		"Pas d'image.",
+		BLANK_FRAME_NAME,
 		cv::Point(10, 40),cv::FONT_HERSHEY_DUPLEX,
 		1, cv::Scalar(0,0,255), 2, false);
 
@@ -109,12 +111,11 @@ int main(int argc, char *argv[])
 		if (recv(hSocket, &server_message, sizeof(uint32_t), 0) == -1){
 			log_info("reception error");
 		}
-		std::string m = std::string("server state: " + std::to_string(server_message));
-		log_info(m);
+		log_info("Received server state");
 
 		// Message 2 (client -> serveur) : envoyer la résolution.
 		bool mustQuit = false;
-		int key = cv::waitKey(30)&0xFF;
+		int key = cv::waitKey(ESC_WAIT_TIME_MICRO_S)&0xFF;
 		message = ELE4205_OK;
 		if(key == ESC){
 			message = ELE4205_QUIT;
@@ -141,8 +142,7 @@ int main(int argc, char *argv[])
 			int imgSize = head->rows * head->cols * CV_ELEM_SIZE(head->flags);
 			uchar* sockData = new uchar[imgSize];
 
-			m = std::string("Start message sending1" + std::to_string(imgSize));
-			log_info(m);
+			log_info("Start message sending1");
 
 			int bytes = 0;
 			// receive first frame and additionnal frame
@@ -153,6 +153,19 @@ int main(int argc, char *argv[])
 				}
 			}
 			cv::Mat frame(head->rows,head->cols, head->type(), sockData);
+
+			// Diviser le programme en processus enfant et parent.
+			if (server_message == STATE_PUSHB){
+				imageID++;
+				pid_t pid = fork();
+				if (pid == 0) {
+					std::string imgName = ("img_"
+						+ std::to_string(imageID) + ".png");
+					cv::imwrite(imgName, frame);
+					exit(0);
+				}
+			}
+
 			log_info("afficher image");
 			cv::imshow(FRAME_WINDOW_NAME, frame);
 			log_info("afficher image1");
@@ -162,9 +175,6 @@ int main(int argc, char *argv[])
 			log_info("Ne rien afficher.");
 			cv::imshow(FRAME_WINDOW_NAME, blankFrame);
 			cv::imshow(FRAME_WINDOW_NAME, noImageFrame);
-		}
-		if (server_message == STATE_PUSHB) {
-			// Fork and save
 		}
 	}
 		

@@ -36,6 +36,7 @@
 #define STATE_PUSHB 0b00000100
 
 #define ESC 27
+#define ESC_WAIT_TIME_MICRO_S	30
 #define FRAME_WINDOW_NAME "Capture vidéo"
 #define MENU_WINDOW_NAME "Sélectionner la résolution"
 #define MENU_W 500
@@ -44,6 +45,11 @@
 #define TEXT_WIDTH	200
 #define FIRST_BUTTON_Y	100
 #define BUTTON_X	100
+#define GUI_BUTTON_PADDING 10
+
+#define BLANK_FRAME_H		200
+#define BLANK_FRAME_W		400
+#define BLANK_FRAME_NAME	"Pas d'image."
 
 #define GPIO_ID "228"
 #define GPIO_DIR "in"
@@ -53,19 +59,14 @@
 #define GPIO_FILENAME "/sys/class/gpio/gpio228/value"
 #define EXPORT_FILE "/sys/class/gpio/export"
 #define GPIO_DIR_DIRECTORY "/sys/class/gpio/gpio228/direction"
+#define ADC_THRESHOLD	1000
+#define BUTTON_UP	1
 
 #ifdef Debug
 #define log_info(x)	std::cout << x << std::endl;
 #else
 #define log_info(x)
 #endif
-
-/*
-Ordre des transfers :
-SERVEUR -> CLIENT  : State
-CLIENT  -> SERVEUR : Resolution
-SERVEUR -> CLIENT  : Image (optionnel)
-*/
 
 /**
  * Résolutions supportées.
@@ -88,6 +89,11 @@ uint32_t getResMask(uint32_t index){
 	mask = mask << index;
 	return mask;
 }
+
+/**
+ * Numéro séquentiel des images à enregistrer.
+ */
+extern int imageID;
 
 /**
  * Obtenir l'indice d'une résolution à partir d'un masque de bits.

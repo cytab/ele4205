@@ -2,6 +2,13 @@
 	\mainpage
 	Projet du cours ELE4205 consistant à réaliser une application de
 	capture de vidéos.
+
+
+	Ordre des transfers entre le client et le serveur :
+	SERVEUR -> CLIENT  : State
+	CLIENT  -> SERVEUR : Resolution
+	SERVEUR -> CLIENT  : Image (optionnel)
+
 **/
 
 #include <capture.hpp>

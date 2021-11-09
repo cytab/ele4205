@@ -11,17 +11,17 @@ int readAdc(){
 	FILE * f = fopen(ADC_FILENAME, READ_FILE_MODE);
 	
 	fread(buffer, 1, 4, f);
-	std::string a (buffer) ;
+	std::string a (buffer);
 	fclose(f);
-	return std::stoi(a) ; 
+	return std::stoi(a);
 }
 
 int readButton(){
-	char buffer[1] = {0};
+	char buffer[] = "0";
 	FILE * f = fopen(GPIO_FILENAME, READ_FILE_MODE);
 	
 	fread(buffer, 1, 1, f);
-	std::string a (buffer) ;
+	std::string a(buffer);
 	fclose(f);
 	return std::stoi(a) ; 
 }
@@ -140,8 +140,8 @@ int main(int argc, char *argv[])
 
 	for (;;) {
 		// Message 1 (serveur -> client) : envoyer l'état.
-		if(readAdc() < 1000){
-			if(readButton() == 0) {
+		if(readAdc() < ADC_THRESHOLD){
+			if(readButton() == BUTTON_UP) {
 				message = STATE_READY;
 			} else {
 				message = STATE_PUSHB;
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 			log_info("reception error");	
 		}
 		uint32_t newIndex = getResIndex(client_message);
-		if (newIndex < 4 && newIndex != resIndex){
+		if (newIndex<sizeof(CAMERA_RESOLUTIONS) && newIndex!=resIndex){
 			resIndex = newIndex;
 			capture.set(CV_CAP_PROP_FRAME_WIDTH,
 				CAMERA_RESOLUTIONS[resIndex].w);
@@ -164,8 +164,7 @@ int main(int argc, char *argv[])
 				CAMERA_RESOLUTIONS[resIndex].h);
 		}
 		
-		std::string m = std::string("communication1 " + std::to_string(newIndex));
-		log_info(m);
+		log_info("communication1 ");
 		if(((ELE4205_OK & client_message) == ELE4205_OK)
 				&& message != STATE_IDOWN) {
 			log_info("ok recu");
