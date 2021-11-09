@@ -162,6 +162,14 @@ int main(int argc, char *argv[])
 					std::string imgName = ("img_"
 						+ std::to_string(imageID) + ".png");
 					cv::imwrite(imgName, frame);
+					// Lecture des caractères
+					tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
+					ocr->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY);
+					ocr->SetPageSegMode(tesseract::PSM_AUTO);
+					ocr->SetImage(frame.data, frame.cols, frame.rows, 3, frame.step);
+					std::string text = std::string(ocr->GetUTF8Text());
+					std::cout << text << std::endl;
+					delete ocr;
 					exit(0);
 				}
 			}
