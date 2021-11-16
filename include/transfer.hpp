@@ -18,6 +18,8 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/opencv.hpp>
+#include <tesseract/baseapi.h>
+#include <leptonica/allheaders.h>
 
 #include "capture.hpp"
 
@@ -192,3 +194,15 @@ int readButton() ;
  * Configurer le GPIO 
  */
 void setEnvGpio() ; 
+
+/**
+ * Enregistrer une image sous format PNG selon le nom fourni en argument.
+ * Ensuite, reconnaître les caractères de l'images et les afficher dans
+ * le terminal. Le code est inspiré d'un exemple trouvé sur
+ * https://tesseract-ocr.github.io/tessdoc/APIExample.html
+ *
+ * \param imgName Nom de l'image à sauvergarder sur le disque.
+ * \param frame Image à enregistrer
+ */
+void saveImgReadCharacters(int imgName, cv::Mat* frame);
+

@@ -10,11 +10,15 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDebug")
 add_executable(server src/server.cpp)
 add_executable(client src/client.cpp)
 
-find_package(OpenCV REQUIRED )
+find_package(OpenCV REQUIRED)
 if(OpenCV_FOUND)
-	include_directories(${OpenCV_INCLUDE_DIRS})
+	include_directories(${OpenCV_INCLUDE_DIRS}
+		/usr/include/tesseract
+		/usr/include/leptonica)
 	target_link_libraries(server ${OpenCV_LIBRARIES})
-	target_link_libraries(client ${OpenCV_LIBRARIES})
+	target_link_libraries(client ${OpenCV_LIBRARIES}
+		tesseract lept)
 else(OpenCV_FOUND)
 	message(FATAL ERROR "Librarie OpenCV introuvable!")
 endif(OpenCV_FOUND)
+

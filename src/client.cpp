@@ -67,6 +67,28 @@ void initializeMenu(cv::Mat &menuImage)
 	}
 }
 
+void saveImgReadCharacters(int imageID, cv::Mat* frame)
+{
+	std::string imgName = ("img_" + std::to_string(imageID) + ".png");
+	cv::imwrite(imgName, *frame);
+
+	// Lecture des caractères. Inspiré de :
+	// (https://tesseract-ocr.github.io/tessdoc/APIExample.html
+	tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
+	if (ocr->Init(NULL, "eng")) {
+		std::cout << "Could not initialize tesseract." << std::endl;
+		exit(1);
+	}
+	ocr->SetVariable("tessedit_char_whitelist",
+		"0123456789abcdefgABCDEFGR#");
+	Pix *textImage = pixRead(imgName.c_str());
+	ocr->SetImage(textImage);
+	std::string text = ocr->GetUTF8Text();
+	std::cout << text << std::endl;
+	ocr->End();
+	delete ocr;
+}
+
 int main(int argc, char *argv[])
 {
 	int hSocket, read_size;
@@ -159,17 +181,7 @@ int main(int argc, char *argv[])
 				imageID++;
 				pid_t pid = fork();
 				if (pid == 0) {
-					std::string imgName = ("img_"
-						+ std::to_string(imageID) + ".png");
-					cv::imwrite(imgName, frame);
-					// Lecture des caractères
-					tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
-					ocr->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY);
-					ocr->SetPageSegMode(tesseract::PSM_AUTO);
-					ocr->SetImage(frame.data, frame.cols, frame.rows, 3, frame.step);
-					std::string text = std::string(ocr->GetUTF8Text());
-					std::cout << text << std::endl;
-					delete ocr;
+					saveImgReadCharacters(imageID, &frame);
 					exit(0);
 				}
 			}

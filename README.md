@@ -72,3 +72,11 @@ Le livrable intègre à présent un circuit qui permet (1) d'enregistrer des
 images en appuyant sur un bouton et (2) de bloquer la transmission d'images
 lorsqu'un détecte photosensible capte une absence de lumière.
 
+### Livrable 5
+
+16 novembre : fin du livrable 5
+
+Le livrable 5 intègre une reconnaissance des caractères dans l'image reçue par
+le client. Les caractères reconnus sont affichés dans le terminal de
+l'application cliente.
+
