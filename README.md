@@ -64,3 +64,11 @@ Centos.
 Le livrable 3 utilise une interface graphique.Cliquez sur les boutons de la
 fenêtre du client pour changer la résolution.
 
+### Livrable 4
+
+9 novembre : fin du librable 4
+
+Le livrable intègre à présent un circuit qui permet (1) d'enregistrer des
+images en appuyant sur un bouton et (2) de bloquer la transmission d'images
+lorsqu'un détecte photosensible capte une absence de lumière.
+
