@@ -9,13 +9,13 @@ uint32_t resMask = 0;
 
 int imageID = 0;
 
-int SocketConnect(int hSocket)
+int SocketConnect(int hSocket, int port)
 {
 	int iRetval=-1;
 	struct sockaddr_in remote= {0};
 	remote.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
 	remote.sin_family = AF_INET;
-	remote.sin_port = htons(PORT_NUMBER);
+	remote.sin_port = htons(port);
 	iRetval = connect(hSocket,(struct sockaddr *)&remote,
 		sizeof(struct sockaddr_in));
 	return iRetval;
@@ -67,7 +67,7 @@ void initializeMenu(cv::Mat &menuImage)
 	}
 }
 
-void saveImgReadCharacters(int imageID, cv::Mat* frame)
+void readAndSendMusic(int imageID, cv::Mat* frame)
 {
 	std::string imgName = ("img_" + std::to_string(imageID) + ".png");
 	cv::imwrite(imgName, *frame);
@@ -77,7 +77,7 @@ void saveImgReadCharacters(int imageID, cv::Mat* frame)
 	tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
 	if (ocr->Init(NULL, "eng")) {
 		std::cout << "Could not initialize tesseract." << std::endl;
-		exit(1);
+		_exit(0);
 	}
 	ocr->SetVariable("tessedit_char_whitelist",
 		"0123456789abcdefgABCDEFGR#");
@@ -85,6 +85,23 @@ void saveImgReadCharacters(int imageID, cv::Mat* frame)
 	ocr->SetImage(textImage);
 	std::string text = ocr->GetUTF8Text();
 	std::cout << text << std::endl;
+
+	usleep(2000000);
+	int musicSocket = SocketCreate();
+	if (SocketConnect(musicSocket, MUSIC_PORT_NUMBER) < 0) {
+		log_info("connect failed.\n");
+		_exit(0);
+	}
+	log_info("Sucessfully conected with server (music)");
+	uint32_t length = text.size();
+	std::cout << length << std::endl;
+	write(musicSocket, &length, sizeof(uint32_t));
+	usleep(2000);
+	write(musicSocket, text.data(), text.size());
+	std::cout << "Wrote message" << std::endl;
+	usleep(200000);
+	close(musicSocket);
+
 	ocr->End();
 	delete ocr;
 }
@@ -128,12 +145,11 @@ int main(int argc, char *argv[])
 		1, cv::Scalar(0,0,255), 2, false);
 
 	for (;;) {
-		log_info("loop1");
 		// Message 1 (serveur -> client) : recevoir l'état.
 		if (recv(hSocket, &server_message, sizeof(uint32_t), 0) == -1){
 			log_info("reception error");
 		}
-		log_info("Received server state");
+		//log_info("Received server state");
 
 		// Message 2 (client -> serveur) : envoyer la résolution.
 		bool mustQuit = false;
@@ -154,17 +170,17 @@ int main(int argc, char *argv[])
 		if(server_message == STATE_READY || server_message == STATE_PUSHB){
 			//Message 3 : receive first header of mat object 
 			char *entete;
-			log_info("about to receive header");
+			//log_info("about to receive header");
 			read_size = recv(hSocket, entete, sizeof(cv::Mat),0);
-			log_info("received header");
+			//log_info("received header");
 			cv::Mat* head = reinterpret_cast<cv::Mat*>(entete); 
 
-			log_info("Start message sending");
+			//log_info("Start message sending");
 
 			int imgSize = head->rows * head->cols * CV_ELEM_SIZE(head->flags);
 			uchar* sockData = new uchar[imgSize];
 
-			log_info("Start message sending1");
+			//log_info("Start message sending1");
 
 			int bytes = 0;
 			// receive first frame and additionnal frame
@@ -181,14 +197,14 @@ int main(int argc, char *argv[])
 				imageID++;
 				pid_t pid = fork();
 				if (pid == 0) {
-					saveImgReadCharacters(imageID, &frame);
-					exit(0);
+					readAndSendMusic(imageID, &frame);
+					_exit(0);
 				}
 			}
 
-			log_info("afficher image");
+			//log_info("afficher image");
 			cv::imshow(FRAME_WINDOW_NAME, frame);
-			log_info("afficher image1");
+			//log_info("afficher image1");
 			
 			delete sockData;
 		} else if (server_message == STATE_IDOWN) {

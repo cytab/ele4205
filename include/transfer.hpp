@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <thread>
+#include <map>
 #include <sys/types.h>
 
 #include "opencv2/highgui/highgui.hpp"
@@ -23,7 +24,8 @@
 
 #include "capture.hpp"
 
-#define PORT_NUMBER	4099
+#define PORT_NUMBER		4099
+#define MUSIC_PORT_NUMBER	4100
 #define SERVER_ADDRESS	"192.168.7.2"
 #define ELE4205_OK	0b00000001
 #define ELE4205_QUIT	0b00000010
@@ -64,6 +66,10 @@
 #define ADC_THRESHOLD	1000
 #define BUTTON_UP	1
 
+#define FREQUENCY_PATH	"/sys/devices/pwm-ctrl.42/freq0"
+#define ENABLE_PATH	"/sys/devices/pwm-ctrl.42/enable0"
+#define DUTY_PATH	"/sys/devices/pwm-ctrl.42/duty0"
+
 #ifdef Debug
 #define log_info(x)	std::cout << x << std::endl;
 #else
@@ -78,6 +84,51 @@ const Resolution CAMERA_RESOLUTIONS[] = {
 	{320, 240},
 	{800, 600},
 	{1280, 720}
+};
+
+/**
+ * Fréquences en fonction du nom des notes.
+ */
+const std::map<std::string, int> NOTE_FREQUENCIES = {
+	{"A",  440},
+	{"A#", 466},
+	{"B",  494},
+	{"C",  523},
+	{"C#", 554},
+	{"D",  587},
+	{"D#", 622},
+	{"E",  659},
+	{"F",  698},
+	{"F#", 734},
+	{"G",  784},
+	{"G#", 831},
+	{"a",  880},
+	{"a#", 932},
+	{"b",  988},
+	{"c",  1046},
+	{"c#", 1109},
+	{"d",  1175},
+	{"d#", 1245},
+	{"e",  1319},
+	{"f",  1397},
+	{"f#", 1480},
+	{"g",  1568},
+	{"g#", 1661},
+};
+
+/**
+ *
+ */
+const std::map<int, float> NOTE_DURATIONS = {
+	{1, 4.0},
+	{2, 2.0},
+	{4, 1.0},
+	{8, 0.5}
+};
+
+typedef struct Note {
+	int frequency;
+	int duration;
 };
 
 /**
@@ -127,7 +178,7 @@ short SocketCreate(void)
  * \param hSocket Descripteur de fichier du socket client.
  * \return Code d'erreur de l'opération (0 pour succès, autres pour erreur).
  */
-int SocketConnect(int hSocket);
+int SocketConnect(int hSocket, int port=PORT_NUMBER);
 
 // Signatures des fonctions serveur.
 /**
@@ -181,19 +232,19 @@ void initializeMenu(cv::Mat &menuImage);
  * Lis la valeur du adc du répertoire /sys/class/saradc
  * \return Valeur entre 0 et 1023 (plus lumineurx -> moins lumineux)
  */
-int readAdc() ; 
+int readAdc(); 
 
 /**
  * Lis la valeur du adc du répertoire /sys/class/gpio/gpio228/value 
  * (value est un fichier et non un programme)
  * \return Valeur entre 0 et 1 
  */
-int readButton() ; 
+int readButton(); 
 
 /**
  * Configurer le GPIO 
  */
-void setEnvGpio() ; 
+void setEnvGpio(); 
 
 /**
  * Enregistrer une image sous format PNG selon le nom fourni en argument.
@@ -204,5 +255,24 @@ void setEnvGpio() ;
  * \param imgName Nom de l'image à sauvergarder sur le disque.
  * \param frame Image à enregistrer
  */
-void saveImgReadCharacters(int imgName, cv::Mat* frame);
+void readAndSendMusic(int imgName, cv::Mat* frame);
 
+/**
+ * 
+ */
+int getTempo(std::string* sheetMusic);
+
+/**
+ *
+ */
+void getNotes(std::string* sheetMusic, std::vector<Note>& notes);
+
+/**
+ *
+ */
+void playNote(Note& note);
+
+/**
+ * Jouer une pièce.
+ */
+void playMusic(std::string* sheetMusic);

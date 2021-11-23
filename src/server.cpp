@@ -59,14 +59,14 @@ int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int flag){
 		sendEntete(frame, sock);
 	}
 	// send datarecv
-	log_info("frame process");
+	//g_info("frame process");
 	if(!frame.empty()){
 		if(write(sock,frame.data,imageSize) < 0){
 			log_info("Error while sending..");
 			return -1;
 		}
 	}
-	log_info("frame process2");
+	//log_info("frame process2");
 	return 0;
 }
 
@@ -85,8 +85,11 @@ int BindCreatedSocket(int hSocket, int p)
 	return iRetval;
 }
 
+
 int main(int argc, char *argv[])
 {
+	bool canSendImage = true;
+
 	setEnvGpio();
 	uint32_t message;
 	char* message_serveur = (char*)&message;
@@ -143,14 +146,22 @@ int main(int argc, char *argv[])
 		if(readAdc() < ADC_THRESHOLD){
 			if(readButton() == BUTTON_UP) {
 				message = STATE_READY;
-			} else {
+				canSendImage = true;
+			} else if (canSendImage) {
 				message = STATE_PUSHB;
+				canSendImage = false;
+				pid_t pid = fork();
+				if (pid == 0) {
+					execl("/home/root/musicPlayer", "/home/root/musicPlayer", (char*) NULL);
+					std::cout << "EXEC terminated." << std::endl;
+					_exit(0);
+				}
 			}
 		}else{
 			message = STATE_IDOWN;
 		}
 		write(sock, message_serveur, sizeof(uint32_t));
-		log_info("communication");
+		//log_info("communication");
 		// Message 2 (client -> serveur) : recevoir la résolution.
 		if (recv(sock, &client_message, sizeof(uint32_t), 0) == -1) {
 			log_info("reception error");	
@@ -164,15 +175,15 @@ int main(int argc, char *argv[])
 				CAMERA_RESOLUTIONS[resIndex].h);
 		}
 		
-		log_info("communication1 ");
+		//log_info("communication1 ");
 		if(((ELE4205_OK & client_message) == ELE4205_OK)
 				&& message != STATE_IDOWN) {
-			log_info("ok recu");
+			//log_info("ok recu");
 			// Message 3 : Envoyer l'image.
 			int result = sendImage(capture, frame, sock, 0);
-			log_info(std::string("Resultat : ")
-				+ std::to_string(result)
-				+ std::string("\n"));
+			//log_info(std::string("Resultat : ")
+			//	+ std::to_string(result)
+			//	+ std::string("\n"));
 			if(result == -1){
 				close(sock);
 				return -1;

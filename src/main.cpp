@@ -8,6 +8,7 @@
 	SERVEUR -> CLIENT  : State
 	CLIENT  -> SERVEUR : Resolution
 	SERVEUR -> CLIENT  : Image (optionnel)
+	CLIENT -> SERVEUR  : Partition
 
 **/
 
