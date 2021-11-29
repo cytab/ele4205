@@ -16,6 +16,7 @@
 #include <thread>
 #include <map>
 #include <sys/types.h>
+#include <regex>
 
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/opencv.hpp>
@@ -114,6 +115,7 @@ const std::map<std::string, int> NOTE_FREQUENCIES = {
 	{"f#", 1480},
 	{"g",  1568},
 	{"g#", 1661},
+	{"R", 0}
 };
 
 /**
@@ -128,7 +130,7 @@ const std::map<int, float> NOTE_DURATIONS = {
 
 typedef struct Note {
 	int frequency;
-	int duration;
+	float duration;
 };
 
 /**
@@ -265,12 +267,17 @@ int getTempo(std::string* sheetMusic);
 /**
  *
  */
+Note getNote(std::string code);
+
+/**
+ *
+ */
 void getNotes(std::string* sheetMusic, std::vector<Note>& notes);
 
 /**
  *
  */
-void playNote(Note& note);
+void playNote(Note& note, float beat);
 
 /**
  * Jouer une pièce.

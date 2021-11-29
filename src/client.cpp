@@ -70,7 +70,10 @@ void initializeMenu(cv::Mat &menuImage)
 void readAndSendMusic(int imageID, cv::Mat* frame)
 {
 	std::string imgName = ("img_" + std::to_string(imageID) + ".png");
-	cv::imwrite(imgName, *frame);
+	cv::Mat grey;
+	cv::cvtColor(*frame, grey, CV_BGR2GRAY);
+	cv::threshold(grey, grey, 110, 220, cv::THRESH_BINARY);
+	cv::imwrite(imgName, grey);
 
 	// Lecture des caractères. Inspiré de :
 	// (https://tesseract-ocr.github.io/tessdoc/APIExample.html
@@ -108,6 +111,7 @@ void readAndSendMusic(int imageID, cv::Mat* frame)
 
 int main(int argc, char *argv[])
 {
+	bool canSendText = true;
 	int hSocket, read_size;
 	struct sockaddr_in server;
 	// Donnees a envoyer vers le serveurs
@@ -193,7 +197,8 @@ int main(int argc, char *argv[])
 			cv::Mat frame(head->rows,head->cols, head->type(), sockData);
 
 			// Diviser le programme en processus enfant et parent.
-			if (server_message == STATE_PUSHB){
+			if (server_message == STATE_PUSHB && canSendText){
+				canSendText = false;
 				imageID++;
 				pid_t pid = fork();
 				if (pid == 0) {
@@ -211,6 +216,9 @@ int main(int argc, char *argv[])
 			log_info("Ne rien afficher.");
 			cv::imshow(FRAME_WINDOW_NAME, blankFrame);
 			cv::imshow(FRAME_WINDOW_NAME, noImageFrame);
+		}
+		if(server_message != STATE_PUSHB){
+			canSendText = true;
 		}
 	}
 		

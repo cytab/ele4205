@@ -29,7 +29,7 @@ cmake ..
 make
 ```
 
-Pour inclure des informations de débogage, remplacez la command `cmake ..`
+Pour inclure des informations de débogage, remplacez la commande `cmake ..`
 par `cmake -DCMAKE_BUILD_TYPE="Debug" ..`
 
 ## Compilation de la documentation

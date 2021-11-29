@@ -8,6 +8,7 @@ include_directories(include/)
 link_directories(include/)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDebug")
 add_executable(server src/server.cpp)
+add_executable(musicPlayer src/musicPlayer.cpp)
 add_executable(client src/client.cpp)
 
 find_package(OpenCV REQUIRED)
