@@ -1,8 +1,30 @@
 /**
- *
- * @file Définitions nécessaires pour l'application en mode client / serveur.
- *
- **/
+
+	@file Définitions nécessaires pour l'application en mode client / serveur. 
+	
+	\mainpage
+	Projet du cours ELE4205 consistant à réaliser une application de
+	capture de vidéos.
+
+	Ordre des transfers entre le client et le serveur :
+
+	SERVEUR -> CLIENT  : State
+
+	CLIENT  -> SERVEUR : Résolution
+
+	SERVEUR -> CLIENT  : Image (optionnel)
+
+	CLIENT -> SERVEUR  : Partition
+
+	Pour toutes les informations concernant la compilation et l'exécution
+	de l'application, consultez le projet
+	https://bitbucket.org/rgourdeau/ele4205_projet_aut2021_25/src/master/.
+
+	L'application est capable de lire des fichiers tels que :
+
+	\image html Autumn_leaves-ocr.png
+
+**/
 
 #include<stdlib.h>
 #include <stdio.h>
