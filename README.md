@@ -118,6 +118,8 @@ $ source /export/tmp/4205_nn/opt/poky/environment-setup-aarch64-poky-linux
 # Compiler les exécutables du serveur et les transférer vers le serveur.
 $ cmake -DBUILD_SERVER=ON ..
 $ make
+# Activer manuellement le réseau sur le USB gagdet ethernet avec la commande ci-dessous
+$ sudo /users/Cours/ele4205/commun/scripts/ifconfig-enp0s-up
 # Réinitialiser la connection SSH. Évidemment, la Odroid-C2 doit être connectée
 # à l'ordinateur bureau et l'amorce (boot) doit être complété. On suppose que
 # l'adresse IP "192.168.7.2" est utilisée.
