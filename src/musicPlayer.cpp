@@ -32,10 +32,21 @@ Note getNote(std::string code)
 {
 	Note note = {};
 	bool hasSharp = false;
-	if (code.size() <= 1 || code.size() > 3) {
+	if (code.size() <= 1 || code.size() > 4) {
 		note.frequency = 0;
 		note.duration = 0.0;
 		return note;
+	}
+	// Special case: '#' is decoded as '11'.
+	if (code.size() == 4) {
+		if (code.at(1) == '1' && code.at(2) == '1') {
+			code = code.at(0) + "#" + code.at(3);
+		}
+		else {
+			note.frequency = 0;
+			note.duration = 0.0;
+			return note;
+		}
 	}
 	// Get note height (frequency)
 	try {
@@ -46,6 +57,15 @@ Note getNote(std::string code)
 		}
 		else {
 			f_chars = code.substr(0, 1);
+		}
+		// Special cases during erroneous character recognition.
+		// 'B' interpreted as '8'
+		if (f_chars.at(0) == '8') {
+			f_chars[0] = 'B';
+		}
+		// 'c' interpreted at '0'
+		if (f_chars.at(0) == '0') {
+			f_chars[0] = 'c';
 		}
 		note.frequency = NOTE_FREQUENCIES.at(f_chars);
 	}
@@ -62,6 +82,15 @@ Note getNote(std::string code)
 		}
 		else {
 			d_chars = code.substr(1, 2);
+		}
+		// Special cases during character recognition
+		// 'B' interpreted as '8'
+		if (d_chars.at(0) == 'B') {
+			d_chars[0] = '8';
+		}
+		// '0' interpreted at 'c'
+		if (d_chars.at(0) == 'c') {
+			d_chars[0] = '0';
 		}
 		int durationIndex = std::stoi(d_chars);
 		float duration = NOTE_DURATIONS.at(durationIndex);
@@ -103,7 +132,6 @@ void getNotes(std::string* sheetMusic, std::vector<Note>& notes)
 
 void playNote(Note& note, float beat)
 {
-	std::cout << "N: " << note.frequency << "    " << note.duration << std::endl;
 	FILE * f = fopen(FREQUENCY_PATH, "w");
 	std::string freq = std::to_string(note.frequency);
 	fwrite(freq.c_str(), freq.size(), sizeof(char), f);
@@ -130,7 +158,6 @@ void playMusic(std::string* sheetMusic)
 	// Tempo
 	int tempo = getTempo(sheetMusic);
 	float beat = 60.0 / (float) tempo;
-	std::cout << "BEAT: " << beat << std::endl;
 	// Notes
 	std::vector<Note> notes = {};
 	getNotes(sheetMusic, notes);
@@ -198,11 +225,8 @@ int main(int argc, char *argv[])
 		sheetMusic += sockData[i];
 	}
 
-	std::cout << sheetMusic << std::endl;
-
 	delete sockData;
 
 	playMusic(&sheetMusic);
 	close(sock);
 }
-

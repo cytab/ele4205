@@ -1,9 +1,8 @@
 /**
  *
- * Définitions nécessaires pour transférer des images par protocole
- * TCP/IP.
+ * @file Définitions nécessaires pour l'application en mode client / sserveur.
  *
- * **/
+ **/
 
 #include<stdlib.h>
 #include <stdio.h>
@@ -27,55 +26,101 @@
 
 #include "capture.hpp"
 
+// Paramètres de transferts de données
+/** @brief Port pour le transfert d'images. */
 #define PORT_NUMBER		4099
+/** @brief Port pour le transfert de musique. */
 #define MUSIC_PORT_NUMBER	4100
+/** @brief Adresse IP de la Odroid-C2. */
 #define SERVER_ADDRESS	"192.168.7.2"
+/** @brief Fanion indiquant que la transmission est réussie. */
 #define ELE4205_OK	0b00000001
+/** @brief Fanion indiquant que la transmission est un échec. */
 #define ELE4205_QUIT	0b00000010
+/** @brief Masque indiquant que la résulution 1 est sélectionnée. */
 #define ELE4205_RES01	0b00000100
+/** @brief Masque indiquant que la résulution 2 est sélectionnée. */
 #define ELE4205_RES02	0b00001000
+/** @brief Masque indiquant que la résulution 3 est sélectionnée. */
 #define ELE4205_RES03	0b00010000
+/** @brief Masque indiquant que la résulution 4 est sélectionnée. */
 #define ELE4205_RES04	0b00100000
+/** @brief Indice de la résulution initiale. */
 #define INITIAL_RES_INDEX 2
 
+/** @brief Masque indiquant que le capteur détecte de la lumière. */
 #define STATE_READY 0b00000001
+/** @brief Masque indiquant que le bouton est appuyé. */
 #define STATE_IDOWN 0b00000010
+/** @brief Masque indiquant que le bouton n'est pas appuyé. */
 #define STATE_PUSHB 0b00000100
 
+// Paramètres de l'interface graphique du client.
+/** @brief Identifiant de la touche ÉCHAPP */
 #define ESC 27
+/** @brief Temps d'attente en millisecondes quand ECHAPP est appuyé. */
 #define ESC_WAIT_TIME_MICRO_S	30
+/** @brief Nom de la fenêtre de visualisation des images. */
 #define FRAME_WINDOW_NAME "Capture vidéo"
+/** @brief Nom de la fenêtre de sélection de la résolution. */
 #define MENU_WINDOW_NAME "Sélectionner la résolution"
+/** @brief Largeur de la fenêtre de sélection. */
 #define MENU_W 800
+/** @brief Hauteur de la fenêtre de sélection. */
 #define MENU_H 500
+/** @brief Hauteur du texte. */
 #define TEXT_HEIGHT	32
+/** @brief Largeur du texte. */
 #define TEXT_WIDTH	200
+/** @brief Position verticale du premier bouton. */
 #define FIRST_BUTTON_Y	100
+/** @brief Position horizontale du premier bouton. */
 #define BUTTON_X	100
+/** @brief Espace entre les boutons. */
 #define GUI_BUTTON_PADDING 10
 
+/** @brief Hauteur de la fenêtre vide. */
 #define BLANK_FRAME_H		200
+/** @brief Largeur de la fenêtre vide. */
 #define BLANK_FRAME_W		400
+/** @brief Nom de la fenêtre vide. */
 #define BLANK_FRAME_NAME	"Pas d'image."
 
+// Paramètres pour l'utilisation des broches sur la Odroid-C2.
+/** @brief Identifiant de la broche de lecture du bouton. */
 #define GPIO_ID "228"
+/** @brief Direction de la lecture. */
 #define GPIO_DIR "in"
+/** @brief Nom du fichier du convertisseur analogique / numérique. */
 #define ADC_FILENAME "/sys/class/saradc/ch0"
+/** @brief Mode de lecture des fichiers. */
 #define READ_FILE_MODE "r"
+/** @brief Mode d'écriture des fichiers. */
 #define WRITE_FILE_MODE "w"
+/** @brief Nom du fichier de la valeur du GPIO. */
 #define GPIO_FILENAME "/sys/class/gpio/gpio228/value"
+/** @brief Nom du fichier d'exportation du GPIO. */
 #define EXPORT_FILE "/sys/class/gpio/export"
+/** @brief Nom du fichier de direction du GPIO. */
 #define GPIO_DIR_DIRECTORY "/sys/class/gpio/gpio228/direction"
+/** @brief Seuil de détection de lumière du ADC. */
 #define ADC_THRESHOLD	1000
+/** @brief État de repos du bouton. */
 #define BUTTON_UP	1
 
+/** @brief Chemin d'accès pour la fréquence du PWM */
 #define FREQUENCY_PATH	"/sys/devices/pwm-ctrl.42/freq0"
+/** @brief Chemin d'accès pour l'activation du PWM. */
 #define ENABLE_PATH	"/sys/devices/pwm-ctrl.42/enable0"
+/** @brief Chemin d'accès pour le rapport cyclique du PWM. */
 #define DUTY_PATH	"/sys/devices/pwm-ctrl.42/duty0"
 
+// Fonction utilitaire de débogage.
 #ifdef Debug
+/** @brief Fonction de journalisation. */
 #define log_info(x)	std::cout << x << std::endl;
 #else
+/** @brief Fonction de journalisation. */
 #define log_info(x)
 #endif
 
@@ -121,7 +166,8 @@ const std::map<std::string, int> NOTE_FREQUENCIES = {
 };
 
 /**
- * Durée en fonction du chiffre suivant la note
+ * Durée en fonction du chiffre suivant la note. La durée est données
+ * en nombres de temps, c'est-à-dire en nombre de noires.
  */
 const std::map<int, float> NOTE_DURATIONS = {
 	{1, 4.0},
@@ -130,6 +176,9 @@ const std::map<int, float> NOTE_DURATIONS = {
 	{8, 0.5}
 };
 
+/**
+ * Structure de stockage d'une note.
+ */
 typedef struct Note {
 	int frequency;
 	float duration;
@@ -276,17 +325,17 @@ int getTempo(std::string* sheetMusic);
 Note getNote(std::string code);
 
 /**
- *Parcoure la partition tout en s'assurant que les codes de lettres 
- *satisfassent la conditions A-Za-z# et appelle getNote.
- *\param sheetMusic Fichier texte contenant la partition de musique.
- *\param notes référence à la structure Notes quiest remplit pendant 
- *la lecture de la partitiom
+ * Parcourt la partition tout en s'assurant que les codes de lettres 
+ * satisfassent la conditions A-Za-z# et appelle getNote.
+ * \param sheetMusic Fichier texte contenant la partition de musique.
+ * \param notes référence à la structure Notes quiest remplit pendant 
+ *     la lecture de la partitiom
  * 
  */
 void getNotes(std::string* sheetMusic, std::vector<Note>& notes);
 
 /**
- *Écris dans le PATH du buzzer afin de produire le son d'une note .
+ * Écris dans le PATH du buzzer afin de produire le son d'une note .
  * 
  * \param note Structure contenant la fréquence et la durée d'une note .
  * \param beat variable obtenu à partir du tempo 60.0 / (float) tempo
@@ -296,6 +345,6 @@ void playNote(Note& note, float beat);
 /**
  * 
  * Jouer une pièce.
- * \param sheetMusic Fichier texte contenant la partition de musique
+ * \param sheetMusic Pointeur vers le texte contenant la partition musicale.
  */
 void playMusic(std::string* sheetMusic);

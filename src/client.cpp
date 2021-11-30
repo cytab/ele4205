@@ -1,6 +1,3 @@
-// Inspiré par
-// https://aticleworld.com/socket-programming-in-c-using-tcpip/
-
 #include "capture.hpp"
 #include "transfer.hpp"
 
@@ -11,6 +8,8 @@ int imageID = 0;
 
 int SocketConnect(int hSocket, int port)
 {
+	// Inspiré par
+	// https://aticleworld.com/socket-programming-in-c-using-tcpip/
 	int iRetval=-1;
 	struct sockaddr_in remote= {0};
 	remote.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
@@ -79,7 +78,7 @@ void readAndSendMusic(int imageID, cv::Mat* frame)
 	// (https://tesseract-ocr.github.io/tessdoc/APIExample.html
 	tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
 	if (ocr->Init(NULL, "eng")) {
-		std::cout << "Could not initialize tesseract." << std::endl;
+		log_info("Could not initialize tesseract.");
 		_exit(0);
 	}
 	ocr->SetVariable("tessedit_char_whitelist",
@@ -87,7 +86,6 @@ void readAndSendMusic(int imageID, cv::Mat* frame)
 	Pix *textImage = pixRead(imgName.c_str());
 	ocr->SetImage(textImage);
 	std::string text = ocr->GetUTF8Text();
-	std::cout << text << std::endl;
 
 	usleep(2000000);
 	int musicSocket = SocketCreate();
@@ -97,11 +95,9 @@ void readAndSendMusic(int imageID, cv::Mat* frame)
 	}
 	log_info("Sucessfully conected with server (music)");
 	uint32_t length = text.size();
-	std::cout << length << std::endl;
 	write(musicSocket, &length, sizeof(uint32_t));
 	usleep(2000);
 	write(musicSocket, text.data(), text.size());
-	std::cout << "Wrote message" << std::endl;
 	usleep(200000);
 	close(musicSocket);
 
@@ -129,7 +125,7 @@ int main(int argc, char *argv[])
 	}
 
 	log_info("Socket is created");
-	//Connect to remote server
+	// Connect to remote server
 	if (SocketConnect(hSocket) < 0) {
 		log_info("connect failed.\n");
 		return 1;
@@ -153,7 +149,7 @@ int main(int argc, char *argv[])
 		if (recv(hSocket, &server_message, sizeof(uint32_t), 0) == -1){
 			log_info("reception error");
 		}
-		//log_info("Received server state");
+		log_info("Received server state");
 
 		// Message 2 (client -> serveur) : envoyer la résolution.
 		bool mustQuit = false;
@@ -174,17 +170,15 @@ int main(int argc, char *argv[])
 		if(server_message == STATE_READY || server_message == STATE_PUSHB){
 			//Message 3 : receive first header of mat object 
 			char *entete;
-			//log_info("about to receive header");
+			log_info("about to receive header");
 			read_size = recv(hSocket, entete, sizeof(cv::Mat),0);
-			//log_info("received header");
+			log_info("received header");
 			cv::Mat* head = reinterpret_cast<cv::Mat*>(entete); 
 
-			//log_info("Start message sending");
+			log_info("Start message sending");
 
 			int imgSize = head->rows * head->cols * CV_ELEM_SIZE(head->flags);
 			uchar* sockData = new uchar[imgSize];
-
-			//log_info("Start message sending1");
 
 			int bytes = 0;
 			// receive first frame and additionnal frame
@@ -207,9 +201,7 @@ int main(int argc, char *argv[])
 				}
 			}
 
-			//log_info("afficher image");
 			cv::imshow(FRAME_WINDOW_NAME, frame);
-			//log_info("afficher image1");
 			
 			delete sockData;
 		} else if (server_message == STATE_IDOWN) {

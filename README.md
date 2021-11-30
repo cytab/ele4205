@@ -18,11 +18,11 @@ L'application logicielle développée est exécutée sur un ordinateur bureau
 les faire jouer par la Odroid-C2. Les rôles de chaque partie sont détaillés
 ci-dessous :
 
-- L'**Ordinateur bureau** est le client de l'application. Il
+- L'**ordinateur bureau** est le client de l'application. Il
   reçoit deux types de données du serveur : (1) des images et (2) l'état
   d'un bouton qui indique si l'image reçue doit être décodée en partition.
   Si c'est le cas, l'image captée est utilisée pour élaborer une série de
-  caractères qui soont transférés au serveur. Le client transmet deux types
+  caractères qui sont transférés au serveur. Le client transmet deux types
   de données au serveur : (1) des partitions et (2) des résolutions à utiliser
   pour la capture des images. Quatre résolutions peuvent être sélectionnées
   avec une interface graphique en gardant le bouton de la souris enfoncé sur
@@ -44,8 +44,9 @@ Les sous-sections suivantes composent le répertoire :
 
 Le projet s'appuie sur les bibliothèques suivantes :
 
-- **OpenCV** pour la capture et le traitement d'images
-- **Tesseract** et **Leptonica** pour la reconnaissance de caractères
+- **Yocto** et **Open Embedded** pour la compilation croisée pour la Odroid-C2.
+- **OpenCV** pour la capture et le traitement d'images.
+- **Tesseract** et **Leptonica** pour la reconnaissance de caractères.
 
 ## Compilation du projet
 
@@ -117,8 +118,10 @@ source /export/tmp/4205_nn/opt/poky/environment-setup-aarch64-poky-linux
 # Compiler les exécutables du serveur et les transférer vers le serveur.
 cmake -DBUILD_SERVER=ON ..
 make
-# Réinitialiser la connection SSH.
-sudo /users/Cours/ele4205/commun/scripts/ifconfig-enp0s-up
+# Réinitialiser la connection SSH. Évidemment, la Odroid-C2 doit être connectée
+# à l'ordinateur bureau et l'amorce (boot) doit être complété. On suppose que
+# l'adresse IP "192.168.7.2" est utilisée.
+ssh-keygen -R 192.168.7.2 # Ou `rm ~/.ssh/known_hosts`
 # Transférer les exécutables.
 scp server root@192.168.7.2:/home/root
 scp musicPlayer root@192.168.7.2:/home/root
