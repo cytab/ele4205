@@ -49,7 +49,7 @@ void mouseCallBack(int event, int x, int y, int flags, void* userdata)
 void initializeMenu(cv::Mat &menuImage)
 {
 	cv::putText(menuImage,
-		"Cliquez sur un format.",
+		"Gardez le bouton de la souris enfoncé sur un format.",
 		cv::Point(10, 40),cv::FONT_HERSHEY_DUPLEX,
 		1, cv::Scalar(0,0,255), 2, false);
 	int yOffset = FIRST_BUTTON_Y;

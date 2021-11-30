@@ -20,8 +20,10 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/opencv.hpp>
+#ifdef BUILD_CLIENT
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
+#endif
 
 #include "capture.hpp"
 
@@ -44,7 +46,7 @@
 #define ESC_WAIT_TIME_MICRO_S	30
 #define FRAME_WINDOW_NAME "Capture vidéo"
 #define MENU_WINDOW_NAME "Sélectionner la résolution"
-#define MENU_W 500
+#define MENU_W 800
 #define MENU_H 500
 #define TEXT_HEIGHT	32
 #define TEXT_WIDTH	200
