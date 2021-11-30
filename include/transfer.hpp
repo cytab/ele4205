@@ -1,6 +1,6 @@
 /**
  *
- * @file Définitions nécessaires pour l'application en mode client / sserveur.
+ * @file Définitions nécessaires pour l'application en mode client / serveur.
  *
  **/
 

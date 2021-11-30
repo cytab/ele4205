@@ -102,7 +102,7 @@ $ source /export/tmp/4205_nn/opt/poky/environment-setup-aarch64-poky-linux
 
 ### Compilation de l'application
 
-Pour générer l'application, il faut d'abord configurer le projet :
+Pour générer l'application, il faut d'abord obtenir le projet :
 ```bash
 $ git clone  https://<Nom utilisateur>@bitbucket.org/rgourdeau/ele4205_projet_aut2021_25.git
 $ cd ELE4205_PROJET_AUT2021_25
@@ -179,7 +179,7 @@ https://bitbucket.org/rgourdeau/ele4205_projet_aut2021_25/src/master/doc/images/
 Pour compiler la documentation, exécutez, dans le répertoire
 `ele4205_projet_aut2021_25/doc`, la commande : `$ doxygen Doxyfile`. Le
 logiciel `doxygen` est nécessaire pour cette opération; s'il ne l'est pas,
-référez-vous à la page du projet en question :
+référez-vous à la page du projet en question pour l'installer :
 `https://www.doxygen.nl/index.html`
 
 ## Progrès
