@@ -142,7 +142,7 @@ Pour inclure des informations de débogage, remplacez la commande
 
 Du côté du serveur, il faut d'abord réaliser le circuit électrique suivant,
 donné par l'énoncé du projet :
-![Montage](https://bitbucket.org/rgourdeau/ele4205_projet_aut2021_25/src/master/doc/images/montage.PNG)
+https://bitbucket.org/rgourdeau/ele4205_projet_aut2021_25/src/master/doc/images/montage.PNG
 
 Le bipeur doit aussi être branché aux broches 33 et 39.
 
@@ -169,7 +169,7 @@ Du côté de l'ordinateur bureau, on peut ensuite lancer le client :
 
 L'application est censée fonctionner. Pour la tester, vous pouvez prendre
 une photo de l'image suivante et vérifier si un son est produit :
-![Image de test](https://bitbucket.org/rgourdeau/ele4205_projet_aut2021_25/src/master/doc/images/Autumn_leaves-ocr.png)
+https://bitbucket.org/rgourdeau/ele4205_projet_aut2021_25/src/master/doc/images/Autumn_leaves-ocr.png
 
 ## Compilation de la documentation
 
