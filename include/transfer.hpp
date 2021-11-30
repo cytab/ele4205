@@ -121,7 +121,7 @@ const std::map<std::string, int> NOTE_FREQUENCIES = {
 };
 
 /**
- *
+ * Durée en fonction du chiffre suivant la note
  */
 const std::map<int, float> NOTE_DURATIONS = {
 	{1, 4.0},
@@ -262,26 +262,40 @@ void setEnvGpio();
 void readAndSendMusic(int imgName, cv::Mat* frame);
 
 /**
- * 
+ * Récupère le tempo se trouvant en début de partition.
+ * \param sheetMusic Fichier texte contenant la partition de musique
  */
 int getTempo(std::string* sheetMusic);
 
 /**
+ * Décrypte  un code (exp : R8) en retrouvant sa fréquence et sa durée.
  *
+ * \param code contenant un code encryptant la note.
+ * \return retourne Note
  */
 Note getNote(std::string code);
 
 /**
- *
+ *Parcoure la partition tout en s'assurant que les codes de lettres 
+ *satisfassent la conditions A-Za-z# et appelle getNote.
+ *\param sheetMusic Fichier texte contenant la partition de musique.
+ *\param notes référence à la structure Notes quiest remplit pendant 
+ *la lecture de la partitiom
+ * 
  */
 void getNotes(std::string* sheetMusic, std::vector<Note>& notes);
 
 /**
- *
+ *Écris dans le PATH du buzzer afin de produire le son d'une note .
+ * 
+ * \param note Structure contenant la fréquence et la durée d'une note .
+ * \param beat variable obtenu à partir du tempo 60.0 / (float) tempo
  */
 void playNote(Note& note, float beat);
 
 /**
+ * 
  * Jouer une pièce.
+ * \param sheetMusic Fichier texte contenant la partition de musique
  */
 void playMusic(std::string* sheetMusic);
