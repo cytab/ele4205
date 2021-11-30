@@ -1,7 +1,7 @@
 // Inspiré par :
 // https://aticleworld.com/socket-programming-in-c-using-tcpip/
 
-#include "transfer.hpp"
+#include "server.hpp"
 
 char resMaks = 0;
 char resIndex = INITIAL_RES_INDEX;
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
 	int bytes = 0;
 	log_info("Capture video");
-	capture.set(CV_CAP_PROP_FORMAT,CV_8UC3);
+	capture.set(CV_CAP_PROP_FORMAT, CV_8UC3);
 	// Accept and incoming connection
 	listen(socket_desc, 5);
 	clientLen = sizeof(struct sockaddr_in);

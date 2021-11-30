@@ -19,12 +19,6 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/opencv.hpp>
-#ifdef BUILD_CLIENT
-#include <tesseract/baseapi.h>
-#include <leptonica/allheaders.h>
-#endif
-
-#include "capture.hpp"
 
 // Paramètres de transferts de données
 /** @brief Port pour le transfert d'images. */
@@ -65,9 +59,9 @@
 /** @brief Nom de la fenêtre de sélection de la résolution. */
 #define MENU_WINDOW_NAME "Sélectionner la résolution"
 /** @brief Largeur de la fenêtre de sélection. */
-#define MENU_W 800
+#define MENU_W 1000
 /** @brief Hauteur de la fenêtre de sélection. */
-#define MENU_H 500
+#define MENU_H 450
 /** @brief Hauteur du texte. */
 #define TEXT_HEIGHT	32
 /** @brief Largeur du texte. */
@@ -125,6 +119,14 @@
 #endif
 
 /**
+ * Resolution Structure d'enregistrement d'une résolution.
+ */
+struct Resolution {
+	int w;
+	int h;
+};
+
+/**
  * Résolutions supportées.
  */
 const Resolution CAMERA_RESOLUTIONS[] = {
@@ -132,56 +134,6 @@ const Resolution CAMERA_RESOLUTIONS[] = {
 	{320, 240},
 	{800, 600},
 	{1280, 720}
-};
-
-/**
- * Fréquences en fonction du nom des notes.
- */
-const std::map<std::string, int> NOTE_FREQUENCIES = {
-	{"A",  440},
-	{"A#", 466},
-	{"B",  494},
-	{"C",  523},
-	{"C#", 554},
-	{"D",  587},
-	{"D#", 622},
-	{"E",  659},
-	{"F",  698},
-	{"F#", 734},
-	{"G",  784},
-	{"G#", 831},
-	{"a",  880},
-	{"a#", 932},
-	{"b",  988},
-	{"c",  1046},
-	{"c#", 1109},
-	{"d",  1175},
-	{"d#", 1245},
-	{"e",  1319},
-	{"f",  1397},
-	{"f#", 1480},
-	{"g",  1568},
-	{"g#", 1661},
-	{"R", 0}
-};
-
-/**
- * Durée en fonction du chiffre suivant la note. La durée est données
- * en nombres de temps, c'est-à-dire en nombre de noires.
- */
-const std::map<int, float> NOTE_DURATIONS = {
-	{1, 4.0},
-	{2, 2.0},
-	{4, 1.0},
-	{8, 0.5}
-};
-
-/**
- * Structure de stockage d'une note.
- */
-typedef struct Note {
-	int frequency;
-	float duration;
 };
 
 /**
@@ -195,11 +147,6 @@ uint32_t getResMask(uint32_t index){
 	mask = mask << index;
 	return mask;
 }
-
-/**
- * Numéro séquentiel des images à enregistrer.
- */
-extern int imageID;
 
 /**
  * Obtenir l'indice d'une résolution à partir d'un masque de bits.
@@ -233,28 +180,6 @@ short SocketCreate(void)
  */
 int SocketConnect(int hSocket, int port=PORT_NUMBER);
 
-// Signatures des fonctions serveur.
-/**
- * Envoyer l'entête d'une image OpenCV au client.
- *
- * \param frame Image OpenCV.
- * \param sock Descripteur de fichier du socket serveur.
- * \return Code d'erreur (0 pour succès).
- */
-int sendEntete(cv::Mat frame, int sock);
-
-/**
- * Envoyer une image complète vers le client.
- *
- * \param capture Object VideoCapture pour prendre des images.
- * \param frame Image OpenCV.
- * \param sock Descripteur de fichier du socket serveur.
- * \param bytes Codes d'erreur.
- * \param flag Fanions de configuration de la fonction.
- * \return Code d'erreur (0 pour succès).
- */
-int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int flag);
-
 /**
  * Lier le socket serveur au socket client.
  *
@@ -264,87 +189,3 @@ int sendImage(cv::VideoCapture capture,cv::Mat frame, int sock, int flag);
  */
 int BindCreatedSocket(int hSocket, int p);
 
-// Fonctions de l'interface graphique.
-/**
- * Réagir aux évènements de la souris.
- * \param event Identifiant de l'évènement.
- * \param x Position du curseur (vertical).
- * \param y Position du curseur (horizontal).
- * \param flags Fanions de configuration.
- * \param userdata Pointeur vers une zone mémoire (inutilisée).
- */
-void mouseCallBack(int event, int x, int y, int flags, void* userdata);
-
-/**
- * Initialiser la fenêtre de l'interface graphique.
- * \param menuImage Référence vers une matrice à afficher.
- */
-void initializeMenu(cv::Mat &menuImage);
-
-/**
- * Lis la valeur du adc du répertoire /sys/class/saradc
- * \return Valeur entre 0 et 1023 (plus lumineurx -> moins lumineux)
- */
-int readAdc(); 
-
-/**
- * Lis la valeur du adc du répertoire /sys/class/gpio/gpio228/value 
- * (value est un fichier et non un programme)
- * \return Valeur entre 0 et 1 
- */
-int readButton(); 
-
-/**
- * Configurer le GPIO 
- */
-void setEnvGpio(); 
-
-/**
- * Enregistrer une image sous format PNG selon le nom fourni en argument.
- * Ensuite, reconnaître les caractères de l'images et les afficher dans
- * le terminal. Le code est inspiré d'un exemple trouvé sur
- * https://tesseract-ocr.github.io/tessdoc/APIExample.html
- *
- * \param imgName Nom de l'image à sauvergarder sur le disque.
- * \param frame Image à enregistrer
- */
-void readAndSendMusic(int imgName, cv::Mat* frame);
-
-/**
- * Récupère le tempo se trouvant en début de partition.
- * \param sheetMusic Fichier texte contenant la partition de musique
- */
-int getTempo(std::string* sheetMusic);
-
-/**
- * Décrypte  un code (exp : R8) en retrouvant sa fréquence et sa durée.
- *
- * \param code contenant un code encryptant la note.
- * \return retourne Note
- */
-Note getNote(std::string code);
-
-/**
- * Parcourt la partition tout en s'assurant que les codes de lettres 
- * satisfassent la conditions A-Za-z# et appelle getNote.
- * \param sheetMusic Fichier texte contenant la partition de musique.
- * \param notes référence à la structure Notes quiest remplit pendant 
- *     la lecture de la partitiom
- * 
- */
-void getNotes(std::string* sheetMusic, std::vector<Note>& notes);
-
-/**
- * Écris dans le PATH du buzzer afin de produire le son d'une note .
- * 
- * \param note Structure contenant la fréquence et la durée d'une note .
- * \param beat variable obtenu à partir du tempo 60.0 / (float) tempo
- */
-void playNote(Note& note, float beat);
-
-/**
- * 
- * Jouer une pièce.
- * \param sheetMusic Pointeur vers le texte contenant la partition musicale.
- */
-void playMusic(std::string* sheetMusic);

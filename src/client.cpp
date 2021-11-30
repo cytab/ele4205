@@ -1,5 +1,4 @@
-#include "capture.hpp"
-#include "transfer.hpp"
+#include "client.hpp"
 
 int currentResolutionIndex = INITIAL_RES_INDEX;
 uint32_t resMask = 0;
@@ -48,7 +47,7 @@ void mouseCallBack(int event, int x, int y, int flags, void* userdata)
 void initializeMenu(cv::Mat &menuImage)
 {
 	cv::putText(menuImage,
-		"Gardez le bouton de la souris enfoncé sur un format.",
+		"Gardez le bouton de la souris enfonce sur un format.",
 		cv::Point(10, 40),cv::FONT_HERSHEY_DUPLEX,
 		1, cv::Scalar(0,0,255), 2, false);
 	int yOffset = FIRST_BUTTON_Y;
@@ -132,7 +131,7 @@ int main(int argc, char *argv[])
 	}
 	log_info("Sucessfully conected with server");
 	
-	cv::Mat menu(MENU_W, MENU_H, CV_64FC4);
+	cv::Mat menu(MENU_H, MENU_W, CV_64FC4);
 	initializeMenu(menu);
 	cv::imshow(MENU_WINDOW_NAME, menu);
 	cv::setMouseCallback(MENU_WINDOW_NAME, mouseCallBack, NULL);
