@@ -142,7 +142,7 @@ Pour inclure des informations de débogage, remplacez la commande
 
 Du côté du serveur, il faut d'abord réaliser le circuit électrique suivant,
 donné par l'énoncé du projet :
-![Montage du projet](/doc/montage.PNG)
+![Montage](doc/montage.PNG)
 
 Le bipeur doit aussi être branché aux broches 33 et 39.
 
