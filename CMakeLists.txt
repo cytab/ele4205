@@ -9,14 +9,19 @@ link_directories(include/)
 # Configurer le projet en mode débogage.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDebug")
 
+message(STATUS "To compile the client, run `cmake -DBUILD_CLIENT=ON ..`. \n
+	To compile the server, run `cmake -DBUILD_SERVER=ON ..`.")
+
 # Sélectionner la compilation du client ou du serveur.
 option(BUILD_CLIENT "Build client program" OFF)
 option(BUILD_SERVER "Build server programs" OFF)
 
 if (BUILD_CLIENT)
+	message(STATUS "Building client")
 	add_executable(client src/client.cpp)
 endif(BUILD_CLIENT)
 if (BUILD_SERVER)
+	message(STATUS "Building server")
 	add_executable(server src/server.cpp)
 	add_executable(musicPlayer src/musicPlayer.cpp)
 endif(BUILD_SERVER)

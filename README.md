@@ -55,19 +55,19 @@ Le projet s'appuie sur les bibliothèques suivantes :
 Obtenez d'abord la chaîne de compilation (SDK) du projet :
 ```bash
 # Obtenir Yocto et Open-embedded pour la Odroid-C2
-bash
-cd /export/tmp/4205_nn/ # Répertoire du projet
-git clone -b krogoth git://git.yoctoproject.org/poky.git
-cd poky
-git clone -b krogoth git://git.openembedded.org/meta-openembedded
-git clone -b master https://github.com/akuster/meta-odroid.gi
-cd meta-odroi
-git checkout 89685506742fa9d9c1860f3eebae5850e6235bdf
-cd ..
+% bash
+$ cd /export/tmp/4205_nn/ # Répertoire du projet
+$ git clone -b krogoth git://git.yoctoproject.org/poky.git
+$ cd poky
+$ git clone -b krogoth git://git.openembedded.org/meta-openembedded
+$ git clone -b master https://github.com/akuster/meta-odroid.gi
+$ cd meta-odroi
+$ git checkout 89685506742fa9d9c1860f3eebae5850e6235bdf
+$ cd ..
 # Ajouter les couches du système
-bitbake-layers add-layer /export/tmp/4205_nn/poky/meta-odroid/
-bitbake-layers add-layer /export/tmp/4205_nn/poky/meta-openembedded/meta-oe/
-bitbake-layers add-layer /export/tmp/4205_nn/poky/ele4205-labo1/
+$ bitbake-layers add-layer /export/tmp/4205_nn/poky/meta-odroid/
+$ bitbake-layers add-layer /export/tmp/4205_nn/poky/meta-openembedded/meta-oe/
+$ bitbake-layers add-layer /export/tmp/4205_nn/poky/ele4205-labo1/
 ```
 
 Dans le fichier `conf/local.conf`, effectuez les modifications suivantes pour
@@ -85,46 +85,46 @@ IMAGE_INSTALL_append = " \
 
 On peut ensuite compiler l'image :
 ```
-umask a+rx u+rwx
-nice bitbake core-image-minimal
+$ umask a+rx u+rwx
+$ nice bitbake core-image-minimal
 ```
 
 Pour faire la compilation avec le SDK, on exécute :
 ```
-cd /export/tmp/4205_nn/poky/
-source oe-init-build-env build-oc2
-umask a+rx u+rwx
-nice bitbake -c populate_sdk core-image-base
-sh ./tmp/deploy/sdk/poky-glibc-x86_64-core-image-base-aarch64-toolchain-2.1.3.sh
-. /export/tmp/4205_nn/opt/poky/environment-setup-aarch64-poky-linux
-source /export/tmp/4205_nn/opt/poky/environment-setup-aarch64-poky-linux
+$ cd /export/tmp/4205_nn/poky/
+$ source oe-init-build-env build-oc2
+$ umask a+rx u+rwx
+$ nice bitbake -c populate_sdk core-image-base
+$ sh ./tmp/deploy/sdk/poky-glibc-x86_64-core-image-base-aarch64-toolchain-2.1.3.sh
+$ . /export/tmp/4205_nn/opt/poky/environment-setup-aarch64-poky-linux
+$ source /export/tmp/4205_nn/opt/poky/environment-setup-aarch64-poky-linux
 ```
 
 ### Compilation de l'application
 
 Pour générer l'application, il faut d'abord configurer le projet :
 ```bash
-git clone  https://<Nom utilisateur>@bitbucket.org/rgourdeau/ele4205_projet_aut2021_25.git
-cd ELE4205_PROJET_AUT2021_25
-mkdir build
-cd build
+$ git clone  https://<Nom utilisateur>@bitbucket.org/rgourdeau/ele4205_projet_aut2021_25.git
+$ cd ELE4205_PROJET_AUT2021_25
+$ mkdir build
+$ cd build
 ```
 
 On compile les exécutables du serveur avec le SDK :
 
 ```bash
-bash
-source /export/tmp/4205_nn/opt/poky/environment-setup-aarch64-poky-linux
+% bash
+$ source /export/tmp/4205_nn/opt/poky/environment-setup-aarch64-poky-linux
 # Compiler les exécutables du serveur et les transférer vers le serveur.
-cmake -DBUILD_SERVER=ON ..
-make
+$ cmake -DBUILD_SERVER=ON ..
+$ make
 # Réinitialiser la connection SSH. Évidemment, la Odroid-C2 doit être connectée
 # à l'ordinateur bureau et l'amorce (boot) doit être complété. On suppose que
 # l'adresse IP "192.168.7.2" est utilisée.
-ssh-keygen -R 192.168.7.2 # Ou `rm ~/.ssh/known_hosts`
+$ ssh-keygen -R 192.168.7.2 # Ou `rm ~/.ssh/known_hosts`
 # Transférer les exécutables.
-scp server root@192.168.7.2:/home/root
-scp musicPlayer root@192.168.7.2:/home/root
+$ scp server root@192.168.7.2:/home/root
+$ scp musicPlayer root@192.168.7.2:/home/root
 ```
 
 On compile l'exécutable du client sans le SDK. Dans un autre terminal,
@@ -132,10 +132,10 @@ exécuter :
 
 ```bash
 # Effacer les données dans le cache avant de compiler l'exécutable du client.
-rm -r ./*
+$ rm -r ./*
 # Compiler l'exécutable du client.
-cmake -DBUILD_CLIENT=ON ..
-make
+$ cmake -DBUILD_CLIENT=ON ..
+$ make
 ```
 
 Pour inclure des informations de débogage, remplacez la commande
